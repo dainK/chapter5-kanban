@@ -1,0 +1,45 @@
+@domain = http://localhost:4000
+@AccessToken = {{loginToken.response.body.$.access_token}}
+### 
+# 회원가입
+# 관리자 회원
+POST {{domain}}/user/signup
+Content-Type: application/json
+
+{
+	"email":"admin@gmail.com",
+	"password":"test_pw",
+  "role":1,
+	"nickname" : "닉네임"
+}
+
+### 
+# 회원가입
+# 일반 회원
+POST {{domain}}/user/signup
+Content-Type: application/json
+
+{
+	"email":"test@gmail.com",
+	"password":"test_pw",
+  "role":0,
+	"nickname" : "닉네임"
+}
+
+###
+# 로그인
+# 이 요청은 사용자 로그인을 처리합니다.
+# @name loginToken
+POST {{domain}}/user/login
+Content-Type: application/json
+
+{
+	"email":"admin@gmail.com",
+	"password":"test_pw"
+}
+###
+# 사용자 정보 조회
+# 이 요청은 현재 로그인된 사용자의 정보를 조회합니다. (인증 토큰 필요)
+GET {{domain}}/user/profile
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
