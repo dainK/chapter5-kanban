@@ -10,7 +10,7 @@ Content-Type: application/json
 	"email":"admin@gmail.com",
 	"password":"test_pw",
   "role":1,
-	"nickname" : "닉네임"
+	"name" : "이름"
 }
 
 ### 
@@ -20,10 +20,10 @@ POST {{domain}}/user/signup
 Content-Type: application/json
 
 {
-	"email":"test@gmail.com",
+	"email":"test1@gmail.com",
 	"password":"test_pw",
   "role":0,
-	"nickname" : "닉네임"
+	"name" : "dlfma"
 }
 
 ###

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Board</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        font-family: "Noto Sans", sans-serif;
+        background: linear-gradient(to bottom, #fffbfe, #ffe3fc);
+      }
+
+      button {
+        margin: 1px;
+        background-color: #fcacfc;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      /* 버튼에 호버 효과 */
+      button:hover {
+        opacity: 0.8;
+      }
+
+      .user-column {
+        margin: 20px;
+        border-radius: 4px;
+        padding: 10px;
+        width: 30%;
+        min-width: 260px;
+      }
+      .user-column-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .button-box {
+        display: flex;
+        gap: 10px; /* 버튼 사이의 간격 조절 */
+        flex: 1; /* 자식 요소가 가로로 꽉 차도록 설정 */
+      }
+      .button-box button {
+        flex: 1; /* 버튼이 가로로 꽉 차도록 설정 */
+      }
+
+      .board {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+        min-height: 90vh;
+      }
+      .column {
+        background-color: white;
+        border-radius: 4px;
+        padding: 10px;
+        width: 30%;
+      }
+      .column-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .card {
+        background-color: white;
+        border: 2px solid #b9d7ff;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        padding: 10px;
+        cursor: pointer;
+      }
+      .card button {
+        /* padding: 10%; */
+        margin: 1%;
+        width: 48%;
+        box-sizing: border-box;
+      }
+      /* 수정 및 삭제 버튼 스타일 */
+      .edit-btn,
+      .delete-btn {
+        background-color: #50b0ff;
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+      }
+
+      .group label {
+        margin-bottom: 5px;
+      }
+
+      .form {
+        display: flex;
+        flex-direction: column;
+      }
+      .form input,
+      .form select,
+      .form textarea,
+      .form button {
+        /* margin-bottom: 10px; */
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .form textarea {
+        height: 100px;
+        overflow-y: auto;
+      }
+      .form input[type="file"] {
+        margin-bottom: 10px;
+        /* Additional styles for file input, such as appearance and border */
+      }
+      .form button {
+        margin-bottom: 10px;
+      }
+
+      .label {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+        transition: border-color 0.3s ease;
+        resize: none;
+      }
+      .input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s ease;
+        resize: none;
+      }
+      /* select 스타일 */
+      .select-input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s ease;
+      }
+      /* 선택된 상태일 때 스타일 변경 */
+      .select-input:focus {
+        border-color: #2196f3;
+        outline: none; /* 포커스 효과 제거 */
+      }
+      /* 선택 목록 스타일 */
+      .select-input option {
+        padding: 10px;
+      }
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+      }
+      .file-input-wrapper input {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+      .file-input-button {
+        display: inline-block;
+        padding: 10px 15px;
+        cursor: pointer;
+        color: #fff;
+        background-color: #ffc6ff;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+      }
+      .file-input-button:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 칸반 보드 -->
+    <div class="board">
+      <div class="column" id="todo">
+        <div class="column-header">TODO</div>
+      </div>
+      <div class="column" id="in-progress">
+        <div class="column-header">INPROGRESS</div>
+      </div>
+      <div class="column" id="done">
+        <div class="column-header">DONE</div>
+      </div>
+      <div class="user-column" id="submit">
+        <div class="button-box">
+          <button id="signup-button">회원가입</button>
+          <button id="login-button">로그인</button>
+          <button id="submit-button">테스크 등록</button>
+          <!-- <button>내 테스크 목록</button> -->
+        </div>
+        <div id="login-container">
+          <div class="user-column-header">LOGIN</div>
+          <div class="form">
+            <div class="group">
+              <label for="id">아이디</label>
+              <input
+                class="input"
+                type="text"
+                id="login-id"
+                placeholder="아이디"
+              />
+            </div>
+            <div class="group">
+              <label for="password">비밀번호</label>
+              <input
+                class="input"
+                type="password"
+                id="login-password"
+                placeholder="비밀번호"
+              />
+            </div>
+            <button id="login-btn">로그인</button>
+          </div>
+        </div>
+
+        <div id="signup-container">
+          <div class="user-column-header">SIGNUP</div>
+          <div class="form">
+            <div class="group">
+              <label for="id">아이디</label>
+              <input
+                class="input"
+                type="text"
+                id="signup-id"
+                placeholder="아이디"
+              />
+            </div>
+            <div class="group">
+              <label for="password">비밀번호</label>
+              <input
+                class="input"
+                type="password"
+                id="signup-password"
+                placeholder="비밀번호"
+              />
+            </div>
+            <div class="group">
+              <label for="passwordconfirm">비밀번호 확인</label>
+              <input
+                class="input"
+                type="password"
+                id="signup-passwordconfirm"
+                placeholder="비밀번호 확인"
+              />
+            </div>
+            <button id="signup-btn">회원가입</button>
+          </div>
+        </div>
+
+        <div id="submit-container">
+          <div class="user-column-header" id="add-task">ADD TASK</div>
+          <div class="user-column-header" id="edit-task" style="display: none;">EDIT TASK</div>
+          <div class="form">
+            <div class="group">
+              <label for="task-title">제목</label>
+              <input
+                class="input"
+                type="text"
+                id="task-title"
+                placeholder="제목"
+              />
+            </div>
+            <div class="group">
+              <label for="task-assignee">담당자</label>
+              <select class="select-input" id="task-assignee">
+                <option value="윤겸">윤겸</option>
+                <option value="정선">정선</option>
+                <option value="아영">아영</option>
+                <option value="다형">다형</option>
+              </select>
+            </div>
+            <div class="group">
+              <label for="task-due-date">완료일</label>
+              <input class="select-input" type="date" id="task-due-date" />
+            </div>
+            <div class="group">
+              <label for="task-priority">우선순위</label>
+              <select class="select-input" id="task-priority">
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </div>
+            <div class="group">
+              <label for="task-status">상태</label>
+              <select class="select-input" id="task-status">
+                <option value="todo">TODO</option>
+                <option value="in-progress">INPROGRESS</option>
+                <option value="done">DONE</option>
+              </select>
+            </div>
+            <div class="group">
+              <label for="task-content">내용</label>
+              <textarea
+                class="input"
+                id="task-content"
+                placeholder="내용"
+              ></textarea>
+            </div>
+            <div class="group">
+              <label for="task-file" class="file-input-wrapper">
+                <span class="file-input-button">파일 선택</span>
+                <input
+                  type="file"
+                  id="task-file"
+                  onchange="displayFileName()"
+                />
+                <span id="file-name">파일 추가하기</span>
+              </label>
+            </div>
+            <button id="submit-btn">등록 하기</button>
+            <button id="edit-btn" style="display: none;">수정 하기</button>
+          </div>
+        </div>
+        
+
+        <div id="task-container">
+          <div class="user-column-header">TASK</div>
+          <div class="group">
+            <label>제목</label>
+            <div class="label"></div>
+          </div>
+          <div class="group">
+            <label>당담자</label>
+            <div class="label"></div>
+          </div>
+          <div class="group">
+            <label>완료일</label>
+            <div class="label"></div>
+          </div>
+          <div class="group">
+            <label>우선순위</label>
+            <div class="label"></div>
+          </div>
+          <div class="group">
+            <label>상태</label>
+            <div class="label"></div>
+          </div>
+          <div class="group">
+            <label>내용</label>
+            <div class="label"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 페이지 로드 시 실행
+      document.addEventListener("DOMContentLoaded", function () {
+        let draggedItem = null;
+        resetTaskConteiner();
+        loadTasks();
+        viewConteiner("login-container");
+
+        // // 서버에 태스크 데이터를 저장하는 함수
+        // function saveTasks() {
+        //   const tasks = [];
+        //   document.querySelectorAll('.column').forEach(column => {
+        //     const columnTasks = Array.from(column.querySelectorAll('.card')).map(card => ({
+        //       title: card.querySelector('strong').textContent,
+        //       dueDate: card.querySelector('.due-date').textContent,
+        //       priority: card.querySelector('.priority').textContent,
+        //       content: card.querySelector('.content').textContent,
+        //       status: column.id,
+        //     }));
+        //     tasks.push(...columnTasks);
+        //   });
+
+        //   axios.post('/api/tasks', { tasks: tasks })
+        //     .then(response => {
+        //       console.log('Tasks saved successfully');
+        //     })
+        //     .catch(error => {
+        //       console.error('Error saving tasks:', error);
+        //     });
+        // }
+
+        // // 서버에서 태스크 데이터를 가져오는 함수
+        // function loadTasks() {
+        //   axios.get('/api/tasks')
+        //     .then(response => {
+        //       const tasks = response.data;  // 서버에서 받아온 태스크 데이터
+        //       tasks.forEach(task => {
+        //         const card = createTaskCard(task.title, task.dueDate, task.priority, task.content);
+        //         document.getElementById(task.status).appendChild(card);
+        //       });
+        //       initializeDragDrop();
+        //     })
+        //     .catch(error => {
+        //       console.error('Error loading tasks:', error);
+        //     });
+        // }
+      });
+
+      // 로컬 스토리지에서 태스크를 불러오는 함수
+      function loadTasks() {
+        const tasks = JSON.parse(localStorage.getItem("tasks"));
+        if (tasks) {
+          tasks.forEach((columnData) => {
+            const column = document.getElementById(columnData.column);
+            columnData.tasks.forEach((taskData) => {
+              const card = createTaskCard(
+                taskData.title,
+                taskData.assignee,
+                taskData.dueDate,
+                taskData.priority,
+                taskData.content
+              );
+              column.appendChild(card);
+            });
+          });
+          // initializeDragDrop();
+        }
+      }
+      // 태스크를 로컬 스토리지에 저장하는 함수
+      function saveTasks() {
+        const tasks = [];
+        document.querySelectorAll(".column").forEach((column) => {
+          const columnTasks = Array.from(column.querySelectorAll(".card")).map(
+            (card) => ({
+              title: card.querySelector("strong").textContent,
+              assignee: card.querySelector("assignee").textContent,
+              dueDate: card.querySelector(".due-date").textContent,
+              priority: card.querySelector(".priority").textContent,
+              content: card.querySelector(".content").textContent,
+              status: column.id,
+            })
+          );
+          tasks.push({ column: column.id, tasks: columnTasks });
+        });
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      }
+
+      // 새 태스크 카드를 생성하는 함수
+      function createTaskCard(title, assignee, dueDate, priority, content) {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.draggable = true;
+
+        const strongElement = document.createElement("strong");
+        strongElement.textContent = title || "제목없음";
+        card.appendChild(strongElement);
+        card.appendChild(document.createElement("br"));
+
+        const assigneeElement = document.createElement("assignee");
+        assigneeElement.textContent = assignee || "담당자없음";
+        card.appendChild(assigneeElement);
+        card.appendChild(document.createElement("br"));
+
+        const dueDateElement = document.createElement("span");
+        dueDateElement.classList.add("due-date");
+        dueDateElement.textContent = dueDate || "날짜없음";
+        card.appendChild(dueDateElement);
+        card.appendChild(document.createElement("br"));
+
+        const priorityElement = document.createElement("span");
+        priorityElement.classList.add("priority");
+        priorityElement.textContent = priority;
+        card.appendChild(priorityElement);
+        card.appendChild(document.createElement("br"));
+
+        const contentElement = document.createElement("span");
+        contentElement.classList.add("content");
+        contentElement.textContent = content;
+        card.appendChild(contentElement);
+        card.appendChild(document.createElement("br"));
+
+        const buttonbox = document.createElement("div");
+        buttonbox.classList.add("button-box");
+        card.appendChild(buttonbox);
+
+        const editButton = document.createElement("button");
+        editButton.classList.add("edit-btn");
+        editButton.textContent = "수정";
+        buttonbox.appendChild(editButton);
+
+        editButton.addEventListener("click", function () {
+          viewConteiner("submit-container");
+          const cardData = {
+            title: card.querySelector("strong").textContent,
+            assignee: card.querySelector("assignee").textContent,
+            dueDate: card.querySelector(".due-date").textContent,
+            priority: card.querySelector(".priority").textContent,
+            status: card.closest(".column").id,
+            content: card.querySelector(".content").textContent,
+          };
+
+          // 여기서 cardData를 활용하여 원하는 작업 수행
+          console.log(cardData);
+
+          document.getElementById("task-title").value = cardData.title;
+          document.getElementById("task-assignee").value = cardData.assignee;
+          (cardData.dueDate !== "날짜없음")
+            document.getElementById("task-due-date").value = cardData.dueDate;
+          document.getElementById("task-priority").value = cardData.priority;
+          document.getElementById("task-status").value = cardData.status;
+          document.getElementById("task-content").value = cardData.content;
+          document.getElementById("submit-btn").style.display = 'none';
+          document.getElementById("edit-btn").style.display = 'block';
+          document.getElementById("add-task").style.display = 'none';
+          document.getElementById("edit-task").style.display = 'block';
+          document.getElementById("edit-btn").addEventListener("click", function () {
+            
+            card.querySelector("strong").textContent = document.getElementById("task-title").value;
+            card.querySelector("assignee").textContent = document.getElementById("task-assignee").value;
+            card.querySelector(".due-date").textContent = document.getElementById("task-due-date").value;
+            card.querySelector(".priority").textContent = document.getElementById("task-priority").value;
+            card.closest(".column").id = document.getElementById("task-status").value;
+            card.querySelector(".content").textContent = document.getElementById("task-content").value;
+          });
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.classList.add("delete-btn");
+        deleteButton.textContent = "삭제";
+        buttonbox.appendChild(deleteButton);
+
+        deleteButton.addEventListener("click", function (e) {
+          e.target.parentNode.parentNode.remove();
+          saveTasks();
+        });
+
+        // 드래그 앤 드롭을
+        card.addEventListener("dragstart", function () {
+          draggedItem = card;
+          card.classList.add("dragging");
+          setTimeout(() => (card.style.display = "none"), 0);
+        });
+
+        card.addEventListener("dragend", function () {
+          setTimeout(() => {
+            card.style.display = "block";
+            card.classList.remove("dragging");
+            draggedItem = null;
+            saveTasks(); // 드래그 종료 시 태스크 저장
+          }, 0);
+        });
+
+        card.addEventListener("click", function (e) {
+          if (
+            !e.target.classList.contains("edit-btn") &&
+            !e.target.classList.contains("delete-btn")
+          ) {
+            console.log("zmfflr");
+            viewConteiner("task-container");
+          }
+        });
+
+        return card;
+      }
+
+
+      function resetTaskConteiner() {
+        document.getElementById("task-title").value = "";
+        document.getElementById("task-assignee").value = "";
+        document.getElementById("task-due-date").value = "";
+        document.getElementById("task-priority").value = "MEDIUM";
+        document.getElementById("task-status").value = "todo";
+        document.getElementById("task-content").value = "";
+        
+        document.getElementById("submit-btn").style.display = 'block';
+        document.getElementById("edit-btn").style.display = 'none';
+        
+        document.getElementById("add-task").style.display = 'block';
+        document.getElementById("edit-task").style.display = 'none';
+      }
+
+      // 드래그 후 요소 위치 결정
+      function getDragAfterElement(container, y) {
+        const draggableElements = [
+          ...container.querySelectorAll(".card:not(.dragging)"),
+        ];
+
+        return draggableElements.reduce(
+          (closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+              return { offset: offset, element: child };
+            } else {
+              return closest;
+            }
+          },
+          { offset: Number.NEGATIVE_INFINITY }
+        ).element;
+      }
+
+      // 드래그 앤 드롭 처리
+      document.querySelectorAll(".column").forEach((column) => {
+        column.addEventListener("dragover", function (e) {
+          e.preventDefault();
+        });
+
+        column.addEventListener("drop", function (e) {
+          e.preventDefault();
+          if (draggedItem) {
+            let afterElement = getDragAfterElement(column, e.clientY);
+            if (afterElement == null) {
+              column.appendChild(draggedItem);
+            } else {
+              column.insertBefore(draggedItem, afterElement);
+            }
+            saveTasks();
+          }
+        });
+      });
+
+      function displayFileName() {
+        const fileInput = document.getElementById("task-file");
+        const fileNameSpan = document.getElementById("file-name");
+
+        if (fileInput.files.length > 0) {
+          fileNameSpan.textContent = fileInput.files[0].name;
+        } else {
+          fileNameSpan.textContent = "";
+        }
+      }
+
+      function viewConteiner(id) {
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("signup-container").style.display = "none";
+        document.getElementById("submit-container").style.display = "none";
+        document.getElementById("task-container").style.display = "none";
+        document.getElementById(id).style.display = "block";
+      }
+      document
+        .getElementById("login-button")
+        .addEventListener("click", viewConteiner.bind(this, "login-container"));
+      document
+        .getElementById("signup-button")
+        .addEventListener(
+          "click",
+          viewConteiner.bind(this, "signup-container")
+        );
+      document
+        .getElementById("submit-button")
+        .addEventListener(
+          "click",
+          function(){
+
+            viewConteiner("submit-container");
+          document.getElementById("add-task").style.display = 'block';
+          document.getElementById("edit-task").style.display = 'none';
+          document.getElementById("submit-btn").style.display = 'block';
+          document.getElementById("edit-btn").style.display = 'none';
+          }
+        );
+      
+        
+        document.getElementById("submit-btn")
+        .addEventListener("click", function () {
+          const title = document.getElementById("task-title").value;
+          const assignee = document.getElementById("task-assignee").value;
+          const dueDate = document.getElementById("task-due-date").value;
+          const priority = document.getElementById("task-priority").value;
+          const status = document.getElementById("task-status").value;
+          const content = document.getElementById("task-content").value;
+
+          const newCard = createTaskCard(
+              title,
+              assignee,
+              dueDate,
+              priority,
+              content
+            );
+            document.getElementById(status).appendChild(newCard);
+        });
+    </script>
+  </body>
+</html>
