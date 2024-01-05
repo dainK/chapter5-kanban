@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-import { Module} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -10,11 +10,10 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CardModule } from './card/card.module';
 
 const typeOrmModuleOptions = {
-  useFactory: async (
-    configService: ConfigService,
-  ): Promise<TypeOrmModuleOptions> => ({
+  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
     namingStrategy: new SnakeNamingStrategy(),
     type: 'mysql',
     username: configService.get('DB_USERNAME'),
@@ -56,8 +55,9 @@ const typeOrmModuleOptions = {
     }),
     UserModule,
     AuthModule,
+    CardModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule{}
+export class AppModule {}
