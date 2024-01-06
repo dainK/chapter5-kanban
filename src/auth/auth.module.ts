@@ -1,11 +1,13 @@
-import { UserModule } from 'src/user/user.module';
-
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { JwtStrategy } from './jwt.strategy';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { UserModule } from 'src/user/user.module';
+import { RedisModule } from 'src/redis/redis.module';
 import { JwtAuthGuard } from './jwt.guard';
 
 @Module({
@@ -18,8 +20,10 @@ import { JwtAuthGuard } from './jwt.guard';
       inject: [ConfigService],
     }),
     UserModule, // 추가!
+    RedisModule,
   ],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, AuthService, JwtAuthGuard],
   exports: [PassportModule],
+  controllers: [AuthController],
 })
 export class AuthModule {}
