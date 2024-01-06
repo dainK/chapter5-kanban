@@ -14,13 +14,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: configService.get('JWT_SECRET_KEY'),
     });
   }
 
   async validate(payload: any) {
-    const user = await this.userService.findOne(payload.email);
+    // console.log('validate: ', payload);
+    const user = await this.userService.findOneByEmail(payload.email);
     if (_.isNil(user)) {
       throw new NotFoundException('해당하는 사용자를 찾을 수 없습니다.');
     }
