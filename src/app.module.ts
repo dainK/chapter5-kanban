@@ -10,7 +10,6 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { RedisModule } from './redis/redis.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -57,7 +56,6 @@ const typeOrmModuleOptions = {
     }),
     UserModule,
     AuthModule,
-    RedisModule,
   ],
   controllers: [],
   providers: [],
