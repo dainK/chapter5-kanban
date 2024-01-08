@@ -23,7 +23,7 @@ Content-Type: application/json
 	"email":"test1@gmail.com",
 	"password":"1234",
   "role":0,
-	"name" : "test1"
+	"name" : "test2"
 }
 
 ###
@@ -64,5 +64,73 @@ Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-	"title":"test4"
+	"title":"test1"
 }
+
+### 
+# 보드 목록 조회
+GET {{domain}}/board
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+### 
+# 보드 상세 조회
+GET {{domain}}/board/2
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+### 
+# 보드 정보 수정
+PATCH {{domain}}/board/2
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+	"title":"test222"
+}
+
+###
+# 보드 정보 삭제
+DELETE {{domain}}/board/2
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+##### COLUMN
+@board_id = 1
+### 
+# 칼럼 저장
+POST {{domain}}/{{board_id}}/board-column
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+	"title":"test3"
+}
+
+### 
+# 칼럼 목록 조회
+GET {{domain}}/{{board_id}}/board-column
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+### 
+# 칼럼 상세 조회
+GET {{domain}}/{{board_id}}/board-column/3
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+### 
+# 칼럼 정보 수정
+PATCH {{domain}}/{{board_id}}/board-column/1
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+	"title":"test111"
+}
+
+###
+# 칼럼 정보 삭제
+DELETE {{domain}}/{{board_id}}/board-column/1
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
