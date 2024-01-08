@@ -5,6 +5,9 @@ export class CreateCardDto {
   @IsNotEmpty()
   boardColumnId: number;
 
+  @IsNotEmpty()
+  userId: number[];
+
   @IsString()
   @IsNotEmpty()
   title: string;

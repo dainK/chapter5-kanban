@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
@@ -12,11 +12,11 @@ export class CardService {
     @InjectRepository(Card)
     private cardRepository: Repository<Card>,
   ) {}
-  async create(createCardDto: CreateCardDto, userId: number) {
+  async create(createCardDto: CreateCardDto) {
     const order = await this.getOrder(createCardDto.boardColumnId);
 
     return await this.cardRepository.save({
-      board_member_id: userId,
+      user_id: createCardDto.userId,
       board_column_id: createCardDto.boardColumnId,
       title: createCardDto.title,
       content: createCardDto.content,
@@ -47,7 +47,7 @@ export class CardService {
         id: card.id,
         title: card.title,
         board_column_id: card.board_column_id,
-        board_member_id: card.board_member_id,
+        user_id: card.user_id,
         dead_line: card.dead_line,
         priority: card.priority,
         order: card.order,
@@ -59,10 +59,7 @@ export class CardService {
     return await this.cardRepository.findOneBy({ id: id });
   }
 
-  async update(id: number, updateCardDto: UpdateCardDto, userId: number) {
-    const card = await this.findOne(id);
-    if (card.board_member_id !== userId) throw new UnauthorizedException('담당자만 수정 가능합니다.');
-
+  async update(id: number, updateCardDto: UpdateCardDto) {
     const newOrder = await this.getNewOrder(updateCardDto.boardColumnId, updateCardDto.index);
     await this.cardRepository.update({ id: id }, { order: newOrder });
 
@@ -101,10 +98,7 @@ export class CardService {
     }
   }
 
-  async remove(id: number, userId: number) {
-    const card = await this.findOne(id);
-    if (card.board_member_id !== userId) throw new UnauthorizedException('담당자만 삭제 가능합니다.');
-
+  async remove(id: number) {
     return await this.cardRepository.delete({ id: id });
   }
 }
