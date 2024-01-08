@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Role } from '../types/userRole.type';
+import { Board } from 'src/board/entities/board.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -18,7 +19,12 @@ export class User {
 
   @Column({ type: 'enum', enum: Role, default: Role.Member })
   role: Role;
-  
+
   @Column({ type: 'varchar', select: true, nullable: false })
   name: string;
+
+  // 일대다 관계 설정(board_member)
+  //(supportMessage) => supportMessage.user : supportMessage 엔티티 내의 'user' 필드를 참고
+  @OneToMany(() => Board, (board) => board.user)
+  board: Board[];
 }

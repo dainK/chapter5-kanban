@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-import { Module} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -11,11 +11,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from './redis/redis.module';
+import { BoardModule } from './board/board.module';
+import { Board } from './board/entities/board.entity';
+import { BoardMemberModule } from './board-member/board-member.module';
+import { BoardColumnModule } from './board-column/board-column.module';
 
 const typeOrmModuleOptions = {
-  useFactory: async (
-    configService: ConfigService,
-  ): Promise<TypeOrmModuleOptions> => ({
+  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
     namingStrategy: new SnakeNamingStrategy(),
     type: 'mysql',
     username: configService.get('DB_USERNAME'),
@@ -23,7 +25,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User],
+    entities: [User, Board],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -58,8 +60,11 @@ const typeOrmModuleOptions = {
     UserModule,
     AuthModule,
     RedisModule,
+    BoardModule,
+    BoardColumnModule,
+    BoardMemberModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule{}
+export class AppModule {}

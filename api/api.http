@@ -55,3 +55,14 @@ Content-Type: application/json
 ### 액세스 토큰 발급
 GET {{domain}}/auth
 Authorization: Bearer {{AccessToken}}
+
+##### BOARD
+### 
+# 보드 저장
+POST {{domain}}/board/create
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+	"title":"test4"
+}
