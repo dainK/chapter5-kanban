@@ -23,7 +23,9 @@ export class BoardMember {
   user_id: number; // 외래키
 
   // 다대일 관계 설정(board)
-  @ManyToOne(() => Board, (board) => board.boardMember)
+  @ManyToOne(() => Board, (board) => board.boardMember, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'board_id' })
   board: Board; // 관계 테이블
   @Column({ type: 'int', name: 'board_id' })

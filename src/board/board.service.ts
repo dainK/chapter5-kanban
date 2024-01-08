@@ -86,7 +86,6 @@ export class BoardService {
   }
 
   async update(id: number, updateBoardDto: UpdateBoardDto, user_id: number) {
-    console.log('updateBoardDto: ', updateBoardDto);
     // 보드 상세 조회
     const existingBoard = await this.boardRepository.findOne({
       where: { id },
@@ -117,7 +116,34 @@ export class BoardService {
     return { board: { title: updateBoardDto.title } };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} board`;
+  async remove(id: number, user_id: number) {
+    console.log('id: ', id);
+    // 보드 상세 조회
+    const existingBoard = await this.boardRepository.findOne({
+      where: { id },
+    });
+
+    // ERR : 보드가 존재하지 않을 경우
+    if (!existingBoard) {
+      throw new NotFoundException('보드가 존재하지 않습니다.');
+    }
+
+    // 조회하려는 보드에 로그인 한 사용자가 멤버로 추가되어 있는지 검사
+    // role이 0(Admin) 또는 1(Editor) 일 때 가능
+    // join문으로 처리해야하남? - 이아영
+    const existingBoardMember = await this.boardMemberRepository.findOne({
+      where: [
+        { id, user_id, role: 0 },
+        { id, user_id, role: 1 },
+      ],
+    });
+
+    // ERR : 포함된 보드가 존재하지 않을 경우
+    if (!existingBoardMember) {
+      throw new UnauthorizedException('권한이 존재하지 않습니다.');
+    }
+
+    const board = await this.boardRepository.delete({ id });
+    return { message: '보드 삭제가 완료되었습니다.' };
   }
 }
