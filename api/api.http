@@ -59,12 +59,12 @@ Authorization: Bearer {{AccessToken}}
 ##### BOARD
 ### 
 # 보드 저장
-POST {{domain}}/board/create
+POST {{domain}}/board
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-	"title":"test1"
+	"title":"test2"
 }
 
 ### 
@@ -75,18 +75,18 @@ Content-Type: application/json
 
 ### 
 # 보드 상세 조회
-GET {{domain}}/board/2
+GET {{domain}}/board/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 ### 
 # 보드 정보 수정
-PATCH {{domain}}/board/2
+PATCH {{domain}}/board/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-	"title":"test222"
+	"title":"test11"
 }
 
 ###
@@ -145,7 +145,7 @@ Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-	"user_id": 3,
+	"user_id": 2,
 	"role": 2
 }
 

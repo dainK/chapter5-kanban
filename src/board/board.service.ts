@@ -36,19 +36,25 @@ export class BoardService {
     return { message: '보드 저장이 완료되었습니다.', board: { title: createBoardDto.title } };
   }
 
-  // 보드 전체 조회(보드 멤버들만)
+  // 보드 목록 조회(보드 멤버들만)
   async findAll(user_id: number) {
     // 로그인 한 사용자의 보드 목록 조회
-    const boards = await this.boardRepository.find({ where: { user_id } });
+    const boards = await this.boardRepository
+      .createQueryBuilder('board')
+      .leftJoin('board.boardMember', 'boardMember')
+      .select(['board.title', 'board.user_id'])
+      .where('boardMember.user_id = :user_id', { user_id })
+      .getMany();
 
     // ERR : 포함된 보드가 존재하지 않을 경우
-    if (!boards) {
+    if (boards.length === 0) {
       throw new NotFoundException('보드가 존재하지 않습니다.');
     }
 
     return { boards };
   }
 
+  // 보드 상세 조회
   async findOne(id: number, user_id: number) {
     const board = await this.findOneBoard(id); // 보드 정보 조회
     await this.checkBoardMember(id, user_id); // 로그인 한 사용자가 보드 멤버로 추가되어 있는지 확인
@@ -76,7 +82,7 @@ export class BoardService {
 
   // 제목 존재 여부 확인
   async findOneByTitle(title: string): Promise<Board | any> {
-    const existingTitle = this.boardRepository.findOne({ where: { title } });
+    const existingTitle = await this.boardRepository.findOne({ where: { title } });
     // ERR : 이미 제목이 존재할 경우
     if (existingTitle) {
       throw new ConflictException('이미 보드 제목이 존재합니다.');
@@ -85,7 +91,7 @@ export class BoardService {
 
   // 보드 존재 여부 확인
   async findOneBoard(id: number): Promise<Board | any> {
-    const existingBoard = this.boardRepository.findOne({ where: { id } });
+    const existingBoard = await this.boardRepository.findOne({ where: { id } });
     // ERR : 보드가 존재하지 않을 경우
     if (!existingBoard) {
       throw new NotFoundException('보드가 존재하지 않습니다.');
