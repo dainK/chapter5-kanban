@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
@@ -46,8 +46,16 @@ export class BoardService {
   }
 
   // 보드 전체 조회(보드 멤버들만~)
-  findAll() {
-    return `This action returns all board`;
+  async findAll(user_id: number) {
+    // 로그인 한 사용자가 소유된 보드들 조회
+    const board = await this.boardRepository.find({ where: { user_id } });
+
+    // ERR : 포함된 보드가 존재하지 않을 경우
+    if (!board) {
+      throw new NotFoundException('보드가 존재하지 않습니다.');
+    }
+
+    return { board };
   }
 
   findOne(id: number) {

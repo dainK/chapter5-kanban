@@ -18,9 +18,10 @@ export class BoardController {
   }
 
   // 보드 목록 조회
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.boardService.findAll();
+  findAll(@Req() req) {
+    return this.boardService.findAll(req.user.id);
   }
   // 보드 상세 조회
   @Get(':id')
