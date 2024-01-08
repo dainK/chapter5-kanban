@@ -1,12 +1,15 @@
+html {
+  height: 100%;
+  margin: 0;
+}
 body {
+  height: 100%;
   margin: 0;
   padding: 0;
   min-height: 100vh;
   width: 100%;
-  /* font-family: "Noto Sans", sans-serif; */
-  /* font-family: 'IBM Plex Sans KR', sans-serif; */
   font-family: "IBM Plex Sans KR", sans-serif;
-  background: linear-gradient(to bottom, #fcfbff, #ffe3fc);
+  background: linear-gradient(to bottom, #fcfbff, #a4c1ff);
 }
 
 /* 전체 스크롤바 스타일링 */
@@ -15,7 +18,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #b9d7ff;
+  background-color: #50b0ff;
   border-radius: 5px;
 }
 
@@ -24,7 +27,7 @@ body {
 }
 
 button {
-  margin: 1px;
+  margin: 2px;
   /* background-color: #fcacfc; */
   background-color: #50b0ff;
   color: white;
@@ -32,6 +35,7 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  border: 2px solid #e9f2ff;
 }
 /* 버튼에 호버 효과 */
 button:hover {
@@ -39,8 +43,8 @@ button:hover {
 }
 
 #sidebar {
-  height: 100%;
-  width: 0;
+  height: 100vh;
+  width: 250px;
   position: fixed;
   z-index: 2;
   top: 0;
@@ -48,21 +52,43 @@ button:hover {
   background-color: #fff;
   background: linear-gradient(to right, #2f00ff, #008cff);
   /* border: 4px solid #b9d7ff; */
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
   transition: 0.5s;
   padding-top: 60px;
 }
-
-#sidebar a {
-  padding: 8px 8px 8px 32px;
+#sidebar p {
+  /* padding: 10px 8px 10px 14px; */
+  padding-left: 14px;
   text-decoration: none;
-  font-size: 25px;
+  font-size: 20px;
+  color: #ffffff;
+  display: block;
+  /* transition: 0.3s; */
+}
+
+#sidebar close {
+  /* margin: 5px; */
+  /* padding-left: 14px; */
+  text-decoration: none;
+  font-size: 18px;
   color: #b9d7ff;
   display: block;
-  transition: 0.3s;
+  cursor: pointer;
+  /* background-color: #fcfbff; */
+}
+#sidebar a {
+  margin: 5px;
+  padding-left: 14px;
+  text-decoration: none;
+  font-size: 18px;
+  color: #b9d7ff;
+  display: block;
+  cursor: pointer;
+  /* background-color: #d4c6ff; */
 }
 #sidebar a:hover {
-  color: #f1f1f1;
+  color: #ffffff;
+  background-color: #a2cfff;
 }
 #sidebar .close-btn {
   position: absolute;
@@ -70,6 +96,8 @@ button:hover {
   right: 25px;
   font-size: 30px;
   margin-left: 50px;
+  color: #fff;
+  cursor: pointer;
 }
 #menu-button {
   font-size: 30px;
@@ -79,6 +107,30 @@ button:hover {
   left: 10px; /* 원하는 왼쪽 여백 */
   z-index: 1;
 }
+/* #board-list  {
+  height: 100vh - 500px;
+  overflow-y: auto;
+} */
+.board-list  {
+  height: 70%;
+  overflow-y: auto;
+  /* background-color: rgb(155, 79, 79); */
+}
+#board-list input {
+  box-sizing: border-box;
+  width: calc(100% - 10px);
+  padding: 5px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+#board-list input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 #modal-container {
   z-index: 3;
   display: none;
@@ -114,8 +166,9 @@ button:hover {
 .column-button-box,
 .button-box {
   display: flex;
-  gap: 10px; /* 버튼 사이의 간격 조절 */
+  /* gap: 5px;  */
   flex: 1;
+  margin: 0 10px 0 10px;
 }
 .button-box button {
   flex: 1;
@@ -128,29 +181,42 @@ button:hover {
   color: #50b0ff;
 }
 
-
-#main {
-  /* padding: 20px; */
+#main-container {
   display: flex;
-  flex: 1;
+  flex-direction: column;
   height: 100vh;
-  width: 100%;
-} 
-.board {
   transition: 0.5s;
-  padding: 20px;
+  margin-left: 250px;
+}
+#main-header {
+  background-color: #a2cfff;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+#main-header h1 {
+  margin-left: 60px;
+  margin-right: 20px; /* 각 내용물들 사이의 간격을 조절합니다 */
+}
+#main {
   display: flex;
   flex: 1;
-  /* height: 90vh; */
+  height: 100vh-80px;
+  width: 100%;
+}
+.board {
+  margin-left: 10px;
+  display: flex;
+  flex: 1;
+  height: 90vh;
   overflow-x: auto;
   width: 90%;
 }
 .column {
   background-color: white;
   border-radius: 4px;
-  /* padding: 10px; */
   margin: 5px;
-  /* width: 30%; */
   min-width: 300px;
   max-height: 100%;
   overflow-y: auto;
@@ -173,7 +239,6 @@ button:hover {
 .column-header {
   font-size: 24px;
   font-weight: bold;
-  /* margin: 10px; */
   text-align: center;
   cursor: text;
 }
@@ -199,14 +264,6 @@ button:hover {
   padding: 10px;
   cursor: grab;
 }
-.card button {
-  /* padding: 10%; */
-  margin: 1%;
-  width: 48%;
-  box-sizing: border-box;
-}
-/* 수정 및 삭제 버튼 스타일 */
-
 
 .group {
   display: flex;

@@ -1,5 +1,5 @@
 // import { moveAddColumButton } from "./board.js";
-import { showAddTaskModal } from "./modal.js";
+import { showAddTaskModal } from "./card.js";
 import {value } from "./value.js";
 
 export function createColumn(columnId, columnTitle) {
@@ -37,14 +37,13 @@ export function createColumn(columnId, columnTitle) {
       // 엔터 키를 누르면 변경된 내용을 적용하고 입력 상자 제거
       if (event.key === "Enter") {
         columnHeader.textContent = inputElement.value;
-        column.removeChild(inputElement);
+        event.target.remove();
       }
     });
 
-    inputElement.addEventListener("blur", function () {
-      // 입력 상자에서 포커스가 벗어날 때, 변경된 내용을 적용하고 입력 상자 제거
+    inputElement.addEventListener("blur", function (event) {
       columnHeader.textContent = inputElement.value;
-      column.removeChild(inputElement);
+      event.target.remove();
     });
 
     columnHeader.textContent = "";
@@ -53,7 +52,6 @@ export function createColumn(columnId, columnTitle) {
   });
 
   columnHeaderBox.appendChild(columnHeader);
-  // column.appendChild(columnHeader);
   column.appendChild(document.createElement("br"));
 
   column.addEventListener("dragover", function (e) {
