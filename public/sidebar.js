@@ -1,55 +1,135 @@
-import { showLoginModal, showSignupModal } from "./modal.js";
-
+import { loadBoardList } from "./board.js";
+import { showLoginModal, showSignupModal } from "./user.js";
 
 // Sidebar 생성
-export function initailizeSideBar () {
+export function initailizeSideBar() {
+  createSidebar();
+  showSidebarState(true);
+}
+
+export function showSidebarState(islogin) {
+  if (islogin) {
+    showSideStatelogin();
+    loadBoardList();
+  } else {
+    showSideStatelogout();
+  }
+}
+
+
+
+function showSideStatelogin() {
+  const text = document.getElementById("sidebar-text");
+  text.innerText = `${"유저"}님 안녕하세요.`;
+  document.getElementById("login-button").style.display = "none";
+  document.getElementById("signup-button").style.display = "none";
+  document.getElementById("logout-button").style.display = "block";
+  document.getElementById("profile-button").style.display = "block";
+}
+
+function showSideStatelogout() {
+  const text = document.getElementById("sidebar-text");
+  text.innerText = `로그인이 필요합니다.`;
+  document.getElementById("login-button").style.display = "block";
+  document.getElementById("signup-button").style.display = "block";
+  document.getElementById("logout-button").style.display = "none";
+  document.getElementById("profile-button").style.display = "none";
+}
+
+function createSidebar() {
+  const main = document.getElementById("main");
+  const button = document.createElement("button");
+  button.id = "menu-button";
+  button.style.backgroundColor = "#a2cfff";
+  button.style.border = "2px solid white";
+  button.style.color = "#white";
+  button.style.padding = "4px";
+  button.innerHTML = `<span class="material-symbols-outlined">
+  arrow_forward_ios
+  </span>`;
+  button.innerHTML = `☰`;
+  button.onclick = openNav;
+  main.appendChild(button);
+
   const sidebar = document.getElementById("sidebar");
 
   // Close 버튼 생성
-  const closeBtn = document.createElement("a");
+  const closeBtn = document.createElement("div");
   closeBtn.href = "javascript:void(0)";
   closeBtn.classList.add("close-btn");
   closeBtn.textContent = "×";
   closeBtn.onclick = closeNav;
-  
+  sidebar.appendChild(closeBtn);
+
+  const text = document.createElement("p");
+  text.id = "sidebar-text";
+  text.innerHTML = `<span class="material-symbols-outlined">
+  account_circle
+  </span>`;
+  sidebar.appendChild(text);
+
+  // 로그인 해야 할 때
+  const notUserbox = document.createElement("div");
+  notUserbox.id = "sidebar-not-user";
+  notUserbox.classList.add("button-box");
+  sidebar.appendChild(notUserbox);
+
   // 로그인 버튼 생성
-  const loginButton = document.createElement("a");
-  loginButton.href = "#";
+  const loginButton = document.createElement("button");
   loginButton.id = "login-button";
   loginButton.textContent = "로그인";
   loginButton.addEventListener("click", showLoginModal);
-  
+  notUserbox.appendChild(loginButton);
+
   // 회원가입 버튼 생성
-  const signupButton = document.createElement("a");
-  signupButton.href = "#";
+  const signupButton = document.createElement("button");
   signupButton.id = "signup-button";
   signupButton.textContent = "회원가입";
   signupButton.addEventListener("click", showSignupModal);
-  
-  // Sidebar에 요소들 추가
-  sidebar.appendChild(closeBtn);
-  sidebar.appendChild(loginButton);
-  sidebar.appendChild(signupButton);
+  notUserbox.appendChild(signupButton);
 
-  
-  const main = document.getElementById("main");
-  
-  const button = document.createElement("span");
-  button.id ='menu-button';
-  button.innerText = '☰';
-  button.onclick = openNav;
-  main.appendChild(button);
-  // document.body.appendChild(button);
+  // 로그인 하고 나서
+  const userbox = document.createElement("div");
+  userbox.id = "sidebar-not-user";
+  userbox.classList.add("button-box");
+  sidebar.appendChild(userbox);
+
+  // 로그아웃 버튼 생성
+  const logoutButton = document.createElement("button");
+  logoutButton.id = "logout-button";
+  logoutButton.textContent = "로그아웃";
+  // logoutButton.addEventListener("click", showLoginModal);
+  userbox.appendChild(logoutButton);
+
+  // 프로필보기 버튼 생성
+  const myButton = document.createElement("button");
+  myButton.id = "profile-button";
+  myButton.textContent = "프로필";
+  // myButton.addEventListener("click", showSignupModal);
+  userbox.appendChild(myButton);
+
+  const boardtext = document.createElement("p");
+  boardtext.innerText = `내 보드 목록`;
+  sidebar.appendChild(boardtext);
+
+  const boardList = document.createElement("div");
+  boardList.id = "board-list";
+  boardList.classList.add("board-list");
+  sidebar.appendChild(boardList);
 }
 
+
 function openNav() {
-  document.getElementById("sidebar").style.width = "250px";
-  document.getElementById("board").style.marginLeft = "250px";
+  document.getElementById("sidebar");
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.left = "0px";
+  document.getElementById("main-container").style.marginLeft = "250px";
   document.getElementById("menu-button").style.display = "none";
 }
 
 function closeNav() {
-  document.getElementById("sidebar").style.width = "0";
-  document.getElementById("board").style.marginLeft = "0";
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.left = "-250px"; // sidebar의 폭만큼 왼쪽으로 이동
+  document.getElementById("main-container").style.marginLeft = "0px";
   document.getElementById("menu-button").style.display = "block";
 }
