@@ -12,7 +12,7 @@ export class BoardController {
 
   // 보드 생성
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
-  @Post('create')
+  @Post()
   create(@Body() createBoardDto: CreateBoardDto, @Req() req) {
     return this.boardService.create(createBoardDto, req.user.id);
   }

@@ -97,7 +97,7 @@ export class BoardService {
     }
 
     // 조회하려는 보드에 로그인 한 사용자가 멤버로 추가되어 있는지 검사
-    // role이 0(Admin) 또는 1(Editor) 일 때 가능
+    // role이 0(Admin) 또는 1(Editor)이 아닌 경우
     // join문으로 처리해야하남? - 이아영
     const existingBoardMember = await this.boardMemberRepository.findOne({
       where: [
@@ -117,7 +117,6 @@ export class BoardService {
   }
 
   async remove(id: number, user_id: number) {
-    console.log('id: ', id);
     // 보드 상세 조회
     const existingBoard = await this.boardRepository.findOne({
       where: { id },
@@ -143,7 +142,8 @@ export class BoardService {
       throw new UnauthorizedException('권한이 존재하지 않습니다.');
     }
 
-    const board = await this.boardRepository.delete({ id });
+    // 보드 멤버 삭제
+    await this.boardRepository.delete({ id });
     return { message: '보드 삭제가 완료되었습니다.' };
   }
 }
