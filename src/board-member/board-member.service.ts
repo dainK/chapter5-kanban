@@ -5,12 +5,15 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { Board } from 'src/board/entities/board.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class BoardMemberService {
   constructor(
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
   ) {}
@@ -39,7 +42,7 @@ export class BoardMemberService {
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
 
     // 보드 멤버 목록 조회
-    const boardMembers = await this.boardMemberRepository.find({ where: { board_id } });
+    const boardMembers = await this.userRepository.createQueryBuilder('user').leftJoin('user.boardMember', 'boardMember').select(['user.email', 'user.name', 'user.role']).where('user.id = :user_id', { user_id }).getMany();
     if (boardMembers.length === 0) {
       throw new NotFoundException('멤버가 존재하지 않습니다.');
     }
@@ -51,7 +54,7 @@ export class BoardMemberService {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
 
-    const boardMember = await this.findBoardMember(board_id, select_user_id); // 보드 멤버 조회
+    const boardMember = await this.userRepository.createQueryBuilder('user').leftJoin('user.boardMember', 'boardMember').select(['user.email', 'user.name', 'user.role']).where('user.id = :user_id', { user_id }).getOne();
     if (!boardMember) {
       throw new ConflictException('멤버가 등록되지 않았습니다.');
     }
@@ -62,7 +65,7 @@ export class BoardMemberService {
   async update(id: number, board_id: number, user_id: number, select_user_id: number, role: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
-    
+
     const boardMember = await this.findBoardMember(board_id, select_user_id); // 보드 멤버 조회
     if (!boardMember) {
       throw new ConflictException('멤버가 등록되지 않았습니다.');

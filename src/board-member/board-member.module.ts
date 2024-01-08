@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { BoardMemberService } from './board-member.service';
 import { BoardMemberController } from './board-member.controller';
 import { BoardMember } from './entities/board-member.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Board } from 'src/board/entities/board.entity';
 
 @Module({
@@ -18,8 +19,9 @@ import { Board } from 'src/board/entities/board.entity';
       inject: [ConfigService],
     }),
     RedisModule,
-    TypeOrmModule.forFeature([Board]),
     TypeOrmModule.forFeature([BoardMember]),
+    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Board]),
   ],
   controllers: [BoardMemberController],
   providers: [BoardMemberService],
