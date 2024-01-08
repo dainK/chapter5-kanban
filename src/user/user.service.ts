@@ -19,9 +19,14 @@ export class UserService {
   ) {}
 
   async create(createDto: CreateUserDto) {
-    const existingUser = await this.findOneByEmail(createDto.email);
-    if (existingUser) {
+    const existingEmail = await this.findOneByEmail(createDto.email);
+    if (existingEmail) {
       throw new ConflictException('이미 해당 이메일로 가입된 사용자가 있습니다!');
+    }
+
+    const existingName = await this.findOneByName(createDto.name);
+    if (existingName) {
+      throw new ConflictException('이미 해당 이름으로 가입된 사용자가 있습니다!');
     }
 
     const hashedPassword = await hash(createDto.password, 10);
@@ -82,5 +87,9 @@ export class UserService {
 
   async findOneByEmail(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findOneByName(name: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { name } });
   }
 }
