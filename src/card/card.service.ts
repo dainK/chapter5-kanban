@@ -63,7 +63,42 @@ export class CardService {
     const card = await this.findOne(id);
     if (card.board_member_id !== userId) throw new UnauthorizedException('담당자만 수정 가능합니다.');
 
+    const newOrder = await this.getNewOrder(updateCardDto.boardColumnId, updateCardDto.index);
+    await this.cardRepository.update({ id: id }, { order: newOrder });
+
     return await this.cardRepository.update({ id: id }, updateCardDto);
+  }
+
+  async getNewOrder(boardColumnId: number, index: number) {
+    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id = boardColumnId', { boardColumnId }).orderBy('card.order', 'ASC').getMany();
+
+    const aboveCard = cards[index];
+    const belowCard = cards[index + 1];
+
+    if (!aboveCard) {
+      const aboveOrder = LexoRank.parse(belowCard.order);
+      if (aboveOrder === LexoRank.min()) this.reOrdering(boardColumnId);
+      return aboveOrder.genPrev().toString();
+    }
+
+    if (!belowCard) {
+      const belowOrder = LexoRank.parse(aboveCard.order);
+      if (belowOrder === LexoRank.max()) this.reOrdering(boardColumnId);
+      return belowOrder.genNext().toString();
+    }
+
+    const newOrder = LexoRank.parse(aboveCard.order).between(LexoRank.parse(belowCard.order)).toString();
+    return newOrder;
+  }
+
+  async reOrdering(boardColumnId) {
+    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id = boardColumnId', { boardColumnId }).orderBy('card.order', 'ASC').getMany();
+
+    let newLexoRank = LexoRank.middle();
+    for (let i = 0; i < cards.length; i++) {
+      cards[i].order = newLexoRank.toString();
+      newLexoRank = newLexoRank.genNext();
+    }
   }
 
   async remove(id: number, userId: number) {

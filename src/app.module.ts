@@ -11,6 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CardModule } from './card/card.module';
+import { Card } from './card/entities/card.entity';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -21,7 +22,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User],
+    entities: [User, Card],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),

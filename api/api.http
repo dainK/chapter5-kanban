@@ -1,6 +1,6 @@
 @domain = http://localhost:4000
 @AccessToken = {{loginToken.response.body.$.access_token}}
-### 
+###
 # 회원가입
 # 관리자 회원
 POST {{domain}}/user/signup
@@ -9,11 +9,11 @@ Content-Type: application/json
 {
 	"email":"admin@gmail.com",
 	"password":"test_pw",
-  "role":1,
+  	"role":1,
 	"name" : "이름"
 }
 
-### 
+###
 # 회원가입
 # 일반 회원
 POST {{domain}}/user/signup
@@ -22,7 +22,7 @@ Content-Type: application/json
 {
 	"email":"test1@gmail.com",
 	"password":"test_pw",
-  "role":0,
+  	"role":0,
 	"name" : "dlfma"
 }
 

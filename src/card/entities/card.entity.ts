@@ -34,6 +34,6 @@ export class Card {
   dead_line: Date;
 
   // task의 중요도에 따라 우선순위에 차등을 둔다. (HIGH, MEDIUM, LOW 등이 있다.)
-  @Column({ type: 'enum', nullable: false })
+  @Column({ type: 'enum', enum: Level, nullable: false })
   priority: Level;
 }

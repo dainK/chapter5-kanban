@@ -1,5 +1,5 @@
 export enum Level {
-    HIGH,
-    MEDIUM,
-    LOW,
+  HIGH,
+  MEDIUM,
+  LOW,
 }
