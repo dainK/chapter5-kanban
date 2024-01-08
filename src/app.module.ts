@@ -12,6 +12,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CardModule } from './card/card.module';
 import { Card } from './card/entities/card.entity';
+import { CommentModule } from './comment/comment.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -57,6 +58,7 @@ const typeOrmModuleOptions = {
     UserModule,
     AuthModule,
     CardModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [],
