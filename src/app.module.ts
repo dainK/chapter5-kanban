@@ -14,6 +14,7 @@ import { RedisModule } from './redis/redis.module';
 import { BoardModule } from './board/board.module';
 import { Board } from './board/entities/board.entity';
 import { BoardMemberModule } from './board-member/board-member.module';
+import { BoardMember } from './board-member/entities/board-member.entity';
 import { BoardColumnModule } from './board-column/board-column.module';
 
 const typeOrmModuleOptions = {
@@ -25,7 +26,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, Board],
+    entities: [User, Board, BoardMember],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),

@@ -2,6 +2,7 @@ import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeor
 
 import { Role } from '../types/userRole.type';
 import { Board } from 'src/board/entities/board.entity';
+import { BoardMember } from 'src/board-member/entities/board-member.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -23,8 +24,13 @@ export class User {
   @Column({ type: 'varchar', select: true, nullable: false })
   name: string;
 
-  // 일대다 관계 설정(board_member)
+  // 일대다 관계 설정(board)
   //(supportMessage) => supportMessage.user : supportMessage 엔티티 내의 'user' 필드를 참고
   @OneToMany(() => Board, (board) => board.user)
   board: Board[];
+
+  // 일대다 관계 설정(board_member)
+  //(supportMessage) => supportMessage.user : supportMessage 엔티티 내의 'user' 필드를 참고
+  @OneToMany(() => BoardMember, (boardMember) => boardMember.user)
+  boardMember: Board[];
 }

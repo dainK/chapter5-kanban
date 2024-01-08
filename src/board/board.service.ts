@@ -6,17 +6,18 @@ import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
+import { BoardMember } from 'src/board-member/entities/board-member.entity';
 
 @Injectable()
 export class BoardService {
   constructor(
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
+    @InjectRepository(BoardMember)
+    private readonly boardMemberRepository: Repository<BoardMember>,
   ) {}
+
   async create(createBoardDto: CreateBoardDto, user_id: number) {
-    console.log('보드 생성 중');
-    console.log(createBoardDto.title);
-    console.log(user_id);
     // 제목 조회
     const existingBoardTitle = await this.boardRepository.findOne({
       where: { title: createBoardDto.title },
@@ -28,14 +29,23 @@ export class BoardService {
     }
 
     // 보드 정보 저장
-    await this.boardRepository.save({
+    const boardDetail = await this.boardRepository.save({
       title: createBoardDto.title,
+      user_id,
+    });
+
+    console.log('boardDetail: ', boardDetail);
+
+    // 보드 멤버 저장
+    await this.boardMemberRepository.save({
+      board_id: boardDetail.id,
       user_id,
     });
 
     return { message: '보드 저장이 완료되었습니다.', board: { title: createBoardDto.title } };
   }
 
+  // 보드 전체 조회(보드 멤버들만~)
   findAll() {
     return `This action returns all board`;
   }
