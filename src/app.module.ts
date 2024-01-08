@@ -14,6 +14,8 @@ import { RedisModule } from './redis/redis.module';
 import { CardModule } from './card/card.module';
 import { Card } from './card/entities/card.entity';
 import { CommentModule } from './comment/comment.module';
+import { CardMemberModule } from './card-member/card-member.module';
+import { CardMember } from './card-member/entities/card-member.entity';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -24,7 +26,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, Card],
+    entities: [User, Card, CardMember],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -61,6 +63,7 @@ const typeOrmModuleOptions = {
     RedisModule,
     CardModule,
     CommentModule,
+    CardMemberModule,
   ],
   controllers: [],
   providers: [],
