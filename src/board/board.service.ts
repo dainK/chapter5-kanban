@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
@@ -40,6 +40,7 @@ export class BoardService {
     await this.boardMemberRepository.save({
       board_id: boardDetail.id,
       user_id,
+      role: 0,
     });
 
     return { message: '보드 저장이 완료되었습니다.', board: { title: createBoardDto.title } };
@@ -58,12 +59,62 @@ export class BoardService {
     return { board };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} board`;
+  // 하나씩은 조회할 필요가.. 없던가..?
+  async findOne(id: number, user_id: number) {
+    // 보드 상세 조회
+    const board = await this.boardRepository.findOne({
+      where: { id },
+    });
+
+    // ERR : 보드가 존재하지 않을 경우
+    if (!board) {
+      throw new NotFoundException('보드가 존재하지 않습니다.');
+    }
+
+    // 조회하려는 보드에 로그인 한 사용자가 멤버로 추가되어 있는지 검사
+    // join문으로 처리해야하남? - 이아영
+    const existingBoardMember = await this.boardMemberRepository.findOne({
+      where: { id, user_id },
+    });
+
+    // ERR : 포함된 보드가 존재하지 않을 경우
+    if (!existingBoardMember) {
+      throw new UnauthorizedException('권한이 존재하지 않습니다.');
+    }
+
+    return { board };
   }
 
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async update(id: number, updateBoardDto: UpdateBoardDto, user_id: number) {
+    console.log('updateBoardDto: ', updateBoardDto);
+    // 보드 상세 조회
+    const existingBoard = await this.boardRepository.findOne({
+      where: { id },
+    });
+
+    // ERR : 보드가 존재하지 않을 경우
+    if (!existingBoard) {
+      throw new NotFoundException('보드가 존재하지 않습니다.');
+    }
+
+    // 조회하려는 보드에 로그인 한 사용자가 멤버로 추가되어 있는지 검사
+    // role이 0(Admin) 또는 1(Editor) 일 때 가능
+    // join문으로 처리해야하남? - 이아영
+    const existingBoardMember = await this.boardMemberRepository.findOne({
+      where: [
+        { id, user_id, role: 0 },
+        { id, user_id, role: 1 },
+      ],
+    });
+
+    // ERR : 포함된 보드가 존재하지 않을 경우
+    if (!existingBoardMember) {
+      throw new UnauthorizedException('권한이 존재하지 않습니다.');
+    }
+
+    // 보드 업데이트
+    const board = await this.boardRepository.update({ id }, { title: updateBoardDto.title });
+    return { board: { title: updateBoardDto.title } };
   }
 
   remove(id: number) {

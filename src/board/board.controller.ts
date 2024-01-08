@@ -23,16 +23,19 @@ export class BoardController {
   findAll(@Req() req) {
     return this.boardService.findAll(req.user.id);
   }
+
   // 보드 상세 조회
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boardService.findOne(+id);
+  findOne(@Param('id') id: string, @Req() req) {
+    return this.boardService.findOne(+id, req.user.id);
   }
 
   // 보드 수정
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardService.update(+id, updateBoardDto);
+  update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto, @Req() req) {
+    return this.boardService.update(+id, updateBoardDto, req.user.id);
   }
 
   // 보드 삭제
