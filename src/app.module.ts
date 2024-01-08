@@ -16,6 +16,7 @@ import { Card } from './card/entities/card.entity';
 import { CommentModule } from './comment/comment.module';
 import { CardMemberModule } from './card-member/card-member.module';
 import { CardMember } from './card-member/entities/card-member.entity';
+import { Comment } from './comment/entities/comment.entity';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -26,7 +27,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, Card, CardMember],
+    entities: [User, Card, CardMember, Comment],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
