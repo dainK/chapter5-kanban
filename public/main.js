@@ -1,11 +1,13 @@
 import { initializeBoard } from "./board.js";
-import { initializeModals } from "./modal.js";
+import { initializeCard } from "./card.js";
+import { initializeModals } from "./user.js";
 import { initailizeSideBar } from "./sidebar.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   initailizeSideBar();
   initializeBoard();
   initializeModals();
+  initializeCard();
 });
 
 // loadTasks();
