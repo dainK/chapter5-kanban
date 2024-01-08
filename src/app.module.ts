@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { RedisModule } from './redis/redis.module';
 import { CardModule } from './card/card.module';
 import { Card } from './card/entities/card.entity';
 import { CommentModule } from './comment/comment.module';
@@ -57,6 +58,7 @@ const typeOrmModuleOptions = {
     }),
     UserModule,
     AuthModule,
+    RedisModule,
     CardModule,
     CommentModule,
   ],

@@ -1,0 +1,306 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100%;
+  /* font-family: "Noto Sans", sans-serif; */
+  /* font-family: 'IBM Plex Sans KR', sans-serif; */
+  font-family: "IBM Plex Sans KR", sans-serif;
+  background: linear-gradient(to bottom, #fcfbff, #ffe3fc);
+}
+
+/* 전체 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #b9d7ff;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+button {
+  margin: 1px;
+  /* background-color: #fcacfc; */
+  background-color: #50b0ff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+/* 버튼에 호버 효과 */
+button:hover {
+  opacity: 0.8;
+}
+
+#sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  background: linear-gradient(to right, #2f00ff, #008cff);
+  /* border: 4px solid #b9d7ff; */
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+#sidebar a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #b9d7ff;
+  display: block;
+  transition: 0.3s;
+}
+#sidebar a:hover {
+  color: #f1f1f1;
+}
+#sidebar .close-btn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 30px;
+  margin-left: 50px;
+}
+#menu-button {
+  font-size: 30px;
+  cursor: pointer;
+  position: fixed; /* 고정 위치 */
+  top: 10px; /* 원하는 상단 여백 */
+  left: 10px; /* 원하는 왼쪽 여백 */
+  z-index: 1;
+}
+#modal-container {
+  z-index: 3;
+  display: none;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+#task-container,
+#submit-container,
+#signup-container,
+#login-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-width: 260px;
+  width: 360px;
+  position: relative; /* 추가: 모달 내부에서의 상대 위치 설정 */
+}
+
+#close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+.column-button-box,
+.button-box {
+  display: flex;
+  gap: 10px; /* 버튼 사이의 간격 조절 */
+  flex: 1;
+}
+.button-box button {
+  flex: 1;
+}
+.column-button-box button {
+  flex: 1;
+  margin: 0px 10px 0px 10px;
+  background-color: white;
+  border: 2px solid #b9d7ff;
+  color: #50b0ff;
+}
+
+
+#main {
+  /* padding: 20px; */
+  display: flex;
+  flex: 1;
+  height: 100vh;
+  width: 100%;
+} 
+.board {
+  transition: 0.5s;
+  padding: 20px;
+  display: flex;
+  flex: 1;
+  /* height: 90vh; */
+  overflow-x: auto;
+  width: 90%;
+}
+.column {
+  background-color: white;
+  border-radius: 4px;
+  /* padding: 10px; */
+  margin: 5px;
+  /* width: 30%; */
+  min-width: 300px;
+  max-height: 100%;
+  overflow-y: auto;
+  cursor: grab;
+  position: relative;
+}
+.column-header-box {
+  font-size: 24px;
+  margin: 20px 40px 0px 40px;
+  text-align: center;
+}
+.trash-button {
+  position: absolute;
+  top: 45px;
+  right: 20px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  cursor: pointer;
+}
+.column-header {
+  font-size: 24px;
+  font-weight: bold;
+  /* margin: 10px; */
+  text-align: center;
+  cursor: text;
+}
+.column-header input {
+  box-sizing: border-box;
+  width: calc(100% - 10px);
+  padding: 5px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.column-header input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+.card {
+  background-color: white;
+  border: 2px solid #b9d7ff;
+  border-radius: 4px;
+  margin: 10px;
+  padding: 10px;
+  cursor: grab;
+}
+.card button {
+  /* padding: 10%; */
+  margin: 1%;
+  width: 48%;
+  box-sizing: border-box;
+}
+/* 수정 및 삭제 버튼 스타일 */
+
+
+.group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.group label {
+  margin-bottom: 5px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+.form input,
+.form select,
+.form textarea,
+.form button {
+  /* margin-bottom: 10px; */
+  width: 100%;
+  box-sizing: border-box;
+}
+.form textarea {
+  height: 100px;
+  overflow-y: auto;
+}
+.form input[type="file"] {
+  margin-bottom: 10px;
+  /* Additional styles for file input, such as appearance and border */
+}
+.form button {
+  margin-bottom: 10px;
+}
+
+.label {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+  transition: border-color 0.3s ease;
+  resize: none;
+}
+.input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease;
+  resize: none;
+}
+/* select 스타일 */
+.select-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease;
+}
+/* 선택된 상태일 때 스타일 변경 */
+.select-input:focus {
+  border-color: #2196f3;
+  outline: none; /* 포커스 효과 제거 */
+}
+/* 선택 목록 스타일 */
+.select-input option {
+  padding: 10px;
+}
+.file-input-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.file-input-wrapper input {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+.file-input-button {
+  display: inline-block;
+  padding: 10px 15px;
+  cursor: pointer;
+  color: #fff;
+  background-color: #ffc6ff;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+.file-input-button:hover {
+  opacity: 0.8;
+}

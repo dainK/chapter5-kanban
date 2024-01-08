@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UserService {
@@ -14,32 +15,30 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
   ) {}
-  
+
   async create(createDto: CreateUserDto) {
     const existingUser = await this.findOneByEmail(createDto.email);
     if (existingUser) {
-      throw new ConflictException(
-        '이미 해당 이메일로 가입된 사용자가 있습니다!',
-      );
+      throw new ConflictException('이미 해당 이메일로 가입된 사용자가 있습니다!');
     }
 
     const hashedPassword = await hash(createDto.password, 10);
     const user = await this.userRepository.save({
-      email : createDto.email,
+      email: createDto.email,
       password: hashedPassword,
-      role : createDto.role,
-      name : createDto.name
+      role: createDto.role,
+      name: createDto.name,
     });
     return {
-      id : user.id,
-      email : user.email,
-      role : user.role,
-      name : user.name
-    }
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    };
   }
 
-  
   async login(email: string, password: string) {
     const user = await this.userRepository.findOne({
       select: ['id', 'email', 'password'],
@@ -54,8 +53,14 @@ export class UserService {
     }
 
     const payload = { email, sub: user.id };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '10s' });
+
+    // refresh token 생성
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    await this.redisService.setRefreshToken(String(user.id), refreshToken);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
     };
   }
 
@@ -78,5 +83,4 @@ export class UserService {
   async findOneByEmail(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { email } });
   }
-
 }
