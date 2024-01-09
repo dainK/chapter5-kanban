@@ -60,7 +60,7 @@ export class UserService {
     }
 
     const payload = { email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '10s' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
 
     // refresh token 생성
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });

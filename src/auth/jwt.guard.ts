@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RedisService } from 'src/redis/redis.service';
 import * as jwt from 'jsonwebtoken';
@@ -27,6 +22,7 @@ export class JwtAuthGuard implements CanActivate {
     try {
       // 엑세스 토큰 조회
       const accessToken = request.headers.authorization;
+      console.log('accessToken: ', accessToken);
       const [authType, authToken] = (accessToken ?? '').split(' ');
       const JWT_SECRET_KEY = this.configService.get('JWT_SECRET_KEY'); // 이러면 .env 파일에 있는 secret 키가 노출되는데 이거 맞나? - 이아영
       const decoded = jwt.verify(authToken, JWT_SECRET_KEY); // 토큰 에러 날 가능성이 Bearer가 아닐때, 유효기간이 지났을 때 말고 더 있을까? - 이아영
@@ -44,7 +40,7 @@ export class JwtAuthGuard implements CanActivate {
         // if (refreshToken) {
         //   // 액세스 토큰 토큰 갱신 시키기
         //   const payload = { email: user.email, sub: user.id };
-        //   const accessToken = this.jwtService.sign(payload, { expiresIn: '10s' }); // 얘를 REST CLIENT에 어케 적용시키냐..
+        //   const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' }); // 얘를 REST CLIENT에 어케 적용시키냐..
         // }
       }
     }
