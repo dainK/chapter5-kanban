@@ -1,8 +1,10 @@
 export function initializeModals() {
   createLoginModal();
   createSignupModal();
+  createProfileModal();
   hideLoginModal();
   hideSignupModal();
+  hideProfileModal();
 }
 
 // 로그인 모달 활성화
@@ -29,6 +31,51 @@ function hideSignupModal() {
   document.getElementById("signup-container").style.display = "none";
 }
 
+export function showProfileModal() {
+  document.getElementById("modal-container").style.display = "flex";
+  document.getElementById("profile-container").style.display = "block";
+
+  document.getElementById("profile-header").textContent = "PROFILE";
+  
+  document.getElementById("profile-edit").style.display = "none";
+  const view = document.getElementById("profile-veiw");
+  view.innerHTML =``;
+  view.style.display ='block';
+
+  const emailgroup = createVeiwGroup("이메일", "email.@email.email");
+  view.appendChild(emailgroup);
+  const nicknamegroup = createVeiwGroup("닉네임", "nickname");
+  view.appendChild(nicknamegroup);
+  
+  const buttonbox = document.createElement("div");
+  buttonbox.classList.add("button-box");
+  view.appendChild(buttonbox);
+
+  // 프로필 수정 버튼 
+  const editBtn = document.createElement("button");
+  editBtn.id = "editProfile-btn";
+  editBtn.textContent = "수정하기";
+  buttonbox.appendChild(editBtn);
+  editBtn.addEventListener("click", ()=>{
+    document.getElementById("profile-header").textContent = "EDIT PROFILE";
+
+    document.getElementById("profile-edit").style.display = "block";
+    document.getElementById("profile-veiw").style.display = "none";
+  });
+
+  // 회원 탈퇴 버튼
+  const withdrawBtn = document.createElement("button");
+  withdrawBtn.id = "withdraw-btn";
+  withdrawBtn.textContent = "탈퇴하기";
+  buttonbox.appendChild(withdrawBtn);
+  // withdrawBtn.addEventListener("click", );
+}
+
+function hideProfileModal() {
+  document.getElementById("modal-container").style.display = "none";
+  document.getElementById("profile-container").style.display = "none";
+}
+
 // 입력 폼 그룹 생성
 function createFormGroup(labelText, inputId, inputType, placeholder) {
   const group = document.createElement("div");
@@ -43,6 +90,24 @@ function createFormGroup(labelText, inputId, inputType, placeholder) {
   input.type = inputType;
   input.id = inputId;
   input.placeholder = placeholder;
+
+  group.appendChild(label);
+  group.appendChild(input);
+
+  return group;
+}
+
+// 보여지는 라벨 그룹 생성
+function createVeiwGroup(labelText, boxText) {
+  const group = document.createElement("div");
+  group.classList.add("group");
+
+  const label = document.createElement("label");
+  label.textContent = labelText;
+
+  const input = document.createElement("div");
+  input.classList.add("input");
+  input.innerText = boxText;
 
   group.appendChild(label);
   group.appendChild(input);
@@ -193,4 +258,51 @@ function createSignupModal() {
   signupContainer.appendChild(form);
 
   document.getElementById("modal-container").appendChild(signupContainer);
+}
+
+
+
+function createProfileModal() {
+  const profileContainer = document.createElement("div");
+  profileContainer.id = "profile-container";
+  document.getElementById("modal-container").appendChild(profileContainer);
+
+  // close-btn 생성
+  const closeBtn = document.createElement("span");
+  closeBtn.id = "close-btn";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.onclick = hideProfileModal;
+  profileContainer.appendChild(closeBtn); 
+  // column-header 생성
+  const columnHeader = document.createElement("div");
+  columnHeader.classList.add("column-header");
+  columnHeader.id = 'profile-header';
+  columnHeader.textContent = "PROFILE";
+  profileContainer.appendChild(columnHeader);
+
+  // 프로필 보기 모드
+  const viewProfile = document.createElement("div");
+  viewProfile.id = 'profile-veiw';
+  profileContainer.appendChild(viewProfile);
+
+  // 프로필 수정 모드
+  const editProfile = document.createElement("div");
+  editProfile.id = 'profile-edit';
+  profileContainer.appendChild(editProfile);
+
+  // form 생성
+  const form = document.createElement("div");
+  form.classList.add("form");
+  editProfile.appendChild(form);
+
+  // 입력 폼 그룹 생성 및 추가 - 닉네임
+  const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", "닉네임");
+  form.appendChild(nicknameGroup);
+
+  // 수정 api 버튼
+  const editBtn2 = document.createElement("button");
+  editBtn2.textContent = "수정하기";
+  form.appendChild(editBtn2);
+  // editBtn2.addEventListener("click", );
+
 }

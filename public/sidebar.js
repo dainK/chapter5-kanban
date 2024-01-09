@@ -1,5 +1,5 @@
 import { loadBoardList } from "./board.js";
-import { showLoginModal, showSignupModal } from "./user.js";
+import { showLoginModal, showSignupModal, showProfileModal } from "./user.js";
 
 // Sidebar 생성
 export function initailizeSideBar() {
@@ -122,7 +122,7 @@ function createSidebar() {
   const myButton = document.createElement("button");
   myButton.id = "profile-button";
   myButton.textContent = "프로필";
-  // myButton.addEventListener("click", showSignupModal);
+  myButton.addEventListener("click", showProfileModal);
   userbox.appendChild(myButton);
 
   const boardtext = document.createElement("p");
