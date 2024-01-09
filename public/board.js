@@ -126,8 +126,8 @@ function initailizeBoardBody() {
   }
 }
 
-export async function loadboard(board_id) {
-  value.boardId = board_id;
+export async function loadboard(boardId) {
+  value.boardId = boardId;
   const accessToken = await localStorage.getItem('access_token');
   await axios
     .get(`/board/${value.boardId}`, {
@@ -185,10 +185,10 @@ async function createBoard() {
     )
     .then((response) => {
       const board = response.data.board;
-      const board_id = board.id;
+      const boardId = board.id;
       const title = board.title;
 
-      drawBoard(board_id, title); // 새로 생성된 보드 그리기
+      drawBoard(boardId, title); // 새로 생성된 보드 그리기
       drawPlusBoard('create'); // 보드 추가 버튼 그리기
     })
     .catch((error) => {
@@ -218,12 +218,12 @@ async function drawPlusBoard(status) {
   });
 }
 
-async function updateBoard(board_id, title) {
+async function updateBoard(boardId, title) {
   const accessToken = await localStorage.getItem('access_token');
   // 보드 정보 보기 api
   await axios
     .patch(
-      `/board/${board_id}`,
+      `/board/${boardId}`,
       { title },
       {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -240,7 +240,7 @@ async function updateBoard(board_id, title) {
 }
 
 // 보드 그리기
-async function drawBoard(board_id, title) {
+async function drawBoard(boardId, title) {
   const boardList = document.getElementById('board-list');
 
   const clickableDiv = document.createElement('a');
@@ -250,7 +250,7 @@ async function drawBoard(board_id, title) {
 
   // 클릭 이벤트 리스너 추가
   clickableDiv.addEventListener('click', function (e) {
-    loadboard(board_id);
+    loadboard(boardId);
   });
 
   const trashButton = document.createElement('div');
@@ -261,8 +261,25 @@ async function drawBoard(board_id, title) {
 
   trashButton.addEventListener('click', function () {
     if (confirm('보드를 삭제하시겠습니까?')) {
-      // 아영 삭제 api 후에 loadBoardList
-      loadBoardList();
+      // 사용자가 '확인'을 클릭한 경우
+      // 보드 정보 삭제 API
+      const accessToken = localStorage.getItem('access_token');
+
+      axios.delete(`/board/${boardId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+          alert("삭제가 완료되었습니다.");
+          location.reload();
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+      // loadBoardList();
     }
   });
 
