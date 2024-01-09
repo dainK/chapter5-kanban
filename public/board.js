@@ -67,33 +67,80 @@ export function loadboard() {
   // 보드이름
 }
 
-export function loadBoardList() {
+export async function loadBoardList() {
   const boardList = document.getElementById("board-list");
+  const accessToken = await localStorage.getItem('access_token');
   boardList.innerHTML = ``;
   // const text = document.createElement("p");
   // text.innerText = `내 보드 목록`;
   // boardList.appendChild(text);
-  const list = ["보드1", "보드2", "qhem3"];
-  list.forEach((element) => {
-    createBoard(element);
-  });
 
-  const plus = document.createElement("a");
-  plus.innerHTML = `<span class="material-symbols-outlined">
-  add_circle
-  </span>`;
-  boardList.appendChild(plus);
-  plus.addEventListener("click",()=>{
-    createBoard("새 보드");
-    boardList.appendChild(plus);
+  // 보드 목록 조회
+  await axios.get('/board', {
+    headers: { Authorization: `Bearer ${accessToken}` }
   })
+    .then(response => {
+      const boards = response.data.boards;
+      boards.forEach((element) => {
+        drawBoard(element.board_id, element.title);
+      });
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
+
+  await drawPlusBoard(); // 보드 추가 버튼 그리기
 }
 
-function createBoard(name) {
+async function createBoard() {
+  const accessToken = await localStorage.getItem('access_token');
+  // 보드 정보 저장
+  await axios.post('/board',
+    {},
+    {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    }
+  )
+    .then(response => {
+      const board = response.data.board;
+      const board_id = board.id;
+      const title = board.title;
+
+      drawBoard(board_id, title); // 새로 생성된 보드 그리기
+      drawPlusBoard('create'); // 보드 추가 버튼 그리기
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
+}
+
+async function drawPlusBoard(status) {
   const boardList = document.getElementById("board-list");
-  
+  const prePlusBtn = document.getElementById("board-plus");
+
+  // 보드를 저장했을 경우 플러스 버튼 재생성
+  if (status === 'create') prePlusBtn.remove();
+
+  const plus = document.createElement("a");
+  plus.id = "board-plus";
+  plus.innerHTML = `<span class="material-symbols-outlined">
+    add_circle
+    <span>`;
+  boardList.appendChild(plus);
+
+  // 보드 추가 버튼 클릭
+  plus.addEventListener("click", () => {
+    createBoard(); // 보드 정보 저장
+  });
+}
+
+async function drawBoard(board_id, title) {
+  const boardList = document.getElementById("board-list");
+
   const clickableDiv = document.createElement("a");
-  clickableDiv.innerText = name;
+  clickableDiv.innerText = title;
   clickableDiv.classList.add("clickable-item");
 
   // 클릭 이벤트 리스너 추가
