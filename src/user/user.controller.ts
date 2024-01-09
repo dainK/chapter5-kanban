@@ -24,18 +24,18 @@ export class UserController {
     return await this.userService.login(loginDto.email, loginDto.password);
   }
 
-  @Post('logout')
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
+  @Post('logout')
   async logout(@Req() req) {
     // 프론트에서 로컬스토리지에 저장한 액세스 토큰을 지워줘야 할 것으로 생각 - 이아영
     await this.redisService.removeRefreshToken(req.user.id); // 리프레시 토큰 삭제
     return { message: '로그아웃이 되었습니다' };
   }
 
-  @Get('profile')
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
+  @Get('profile')
   async getProfile(@Req() req) {
-    return await this.userService.findOneByEmail(req.user.email);
+    return await this.userService.findOne(req.user.id);
   }
 
   @Get()
@@ -43,6 +43,7 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
