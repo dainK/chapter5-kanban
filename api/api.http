@@ -1,17 +1,5 @@
 @domain = http://localhost:4000
 @AccessToken = {{loginToken.response.body.$.access_token}}
-### 
-# 회원가입
-# 관리자 회원
-POST {{domain}}/user/signup
-Content-Type: application/json
-
-{
-	"email":"admin@gmail.com",
-	"password":"test_pw",
-  "role":1,
-	"name" : "이름"
-}
 
 ### 
 # 회원가입
@@ -20,10 +8,9 @@ POST {{domain}}/user/signup
 Content-Type: application/json
 
 {
-	"email":"test3@gmail.com",
+	"email":"test3@test.com",
 	"password":"1234",
-  "role":0,
-	"name" : "test22"
+	"name" : "test3"
 }
 
 ###
@@ -34,7 +21,7 @@ POST {{domain}}/user/login
 Content-Type: application/json
 
 {
-	"email":"test1@gmail.com",
+	"email":"test1@test.com",
 	"password":"1234"
 }
 
@@ -155,7 +142,7 @@ Content-Type: application/json
 
 ### 
 # 보드 멤버 상세 조회
-GET {{domain}}/board-member/1/2
+GET {{domain}}/board-member/1/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 

@@ -1,6 +1,5 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Role } from '../types/userRole.type';
 import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
 
@@ -18,10 +17,7 @@ export class User {
   @Column({ type: 'varchar', select: false, nullable: false })
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.Member })
-  role: Role;
-
-  @Column({ type: 'varchar', unique:true, select: true, nullable: false })
+  @Column({ type: 'varchar', unique: true, select: true, nullable: false })
   name: string;
 
   // 일대다 관계 설정(board)

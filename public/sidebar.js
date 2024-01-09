@@ -100,9 +100,21 @@ function createSidebar() {
   const logoutButton = document.createElement("button");
   logoutButton.id = "logout-button";
   logoutButton.textContent = "로그아웃";
-  logoutButton.addEventListener("click", ()=>{
-    localStorage.removeItem('access_token');
-    location.reload();
+  logoutButton.addEventListener("click", () => {
+    const accessToken = localStorage.getItem('access_token');
+    axios
+      .post(
+        '/user/logout',
+        {},
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      )
+      .then((response) => {
+        localStorage.removeItem('access_token');
+        location.reload();
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      });
   });
   userbox.appendChild(logoutButton);
 
