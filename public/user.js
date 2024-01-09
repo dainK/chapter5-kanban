@@ -38,6 +38,7 @@ export async function showProfileModal() {
   document.getElementById("profile-header").textContent = "PROFILE";
 
   document.getElementById("profile-edit").style.display = "none";
+
   const view = document.getElementById("profile-veiw");
   view.innerHTML = ``;
   view.style.display = 'block';
@@ -53,6 +54,7 @@ export async function showProfileModal() {
       view.appendChild(emailgroup);
       const nicknamegroup = createVeiwGroup("닉네임", user.name);
       view.appendChild(nicknamegroup);
+      document.getElementById("profile-name").value = user.name; // 프로필 수정 부분에도 name 조회시켜놓기!!
     })
     .catch(error => {
       console.log('error: ', error);
@@ -326,22 +328,9 @@ async function createProfileModal() {
   form.classList.add("form");
   editProfile.appendChild(form);
 
-  // 아영
-  // // 회원 정보 조회 API (기존 이름을 placeholder에 넣는 용도 / 불필요 시 삭제해도 좋습니다 ! - 이아영)
-  // const accessToken = await localStorage.getItem('access_token');
-  // await axios.get('/user/profile', {
-  //   headers: { Authorization: `Bearer ${accessToken}` }
-  // })
-  //   .then(response => {
-  //     const user = response.data.user;
-  //     // 입력 폼 그룹 생성 및 추가 - 닉네임
-  //     const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", user.name);
-  //     form.appendChild(nicknameGroup);
-  //   })
-  //   .catch(error => {
-  //     console.log('error: ', error);
-  //     alert(error.response.data.message);
-  //   });
+  // 입력 폼 그룹 생성 및 추가 - 닉네임
+  const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", "");
+  form.appendChild(nicknameGroup);
 
   // 회원 정보 수정 API
   const editBtn2 = document.createElement("button");
@@ -350,6 +339,8 @@ async function createProfileModal() {
 
   editBtn2.addEventListener("click", () => {
     const name = document.getElementById("profile-name").value;
+    const accessToken = localStorage.getItem('access_token');
+
     // 보드 정보 수정 API
     axios.patch(`/user`,
       { name },
