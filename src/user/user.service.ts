@@ -33,13 +33,11 @@ export class UserService {
     const user = await this.userRepository.save({
       email: createDto.email,
       password: hashedPassword,
-      role: createDto.role,
       name: createDto.name,
     });
     return {
       id: user.id,
       email: user.email,
-      role: user.role,
       name: user.name,
     };
   }
