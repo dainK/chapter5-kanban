@@ -34,7 +34,7 @@ POST {{domain}}/user/login
 Content-Type: application/json
 
 {
-	"email":"test1@gmail.com",
+	"email":"test1@test.com",
 	"password":"1234"
 }
 
@@ -155,7 +155,7 @@ Content-Type: application/json
 
 ###
 # 보드 멤버 상세 조회
-GET {{domain}}/board-member/1/2
+GET {{domain}}/board-member/1/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 

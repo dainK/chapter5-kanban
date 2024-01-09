@@ -1,20 +1,22 @@
 import { loadBoardList } from "./board.js";
-import { showLoginModal, showSignupModal } from "./user.js";
+import { showLoginModal, showSignupModal, showProfileModal } from "./user.js";
 
 // Sidebar 생성
 export function initailizeSideBar() {
   createSidebar();
-  showSidebarState(true);
+  showSidebarState(false);
 }
 
-export function showSidebarState(islogin) {
-  if (islogin) {
+export function showSidebarState() {
+  const accessToken = localStorage.getItem('access_token');
+  if (accessToken !== null) {
     showSideStatelogin();
     loadBoardList();
   } else {
     showSideStatelogout();
   }
 }
+
 
 
 
@@ -98,14 +100,29 @@ function createSidebar() {
   const logoutButton = document.createElement("button");
   logoutButton.id = "logout-button";
   logoutButton.textContent = "로그아웃";
-  // logoutButton.addEventListener("click", showLoginModal);
+  logoutButton.addEventListener("click", () => {
+    const accessToken = localStorage.getItem('access_token');
+    axios
+      .post(
+        '/user/logout',
+        {},
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      )
+      .then((response) => {
+        localStorage.removeItem('access_token');
+        location.reload();
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      });
+  });
   userbox.appendChild(logoutButton);
 
   // 프로필보기 버튼 생성
   const myButton = document.createElement("button");
   myButton.id = "profile-button";
   myButton.textContent = "프로필";
-  // myButton.addEventListener("click", showSignupModal);
+  myButton.addEventListener("click", showProfileModal);
   userbox.appendChild(myButton);
 
   const boardtext = document.createElement("p");

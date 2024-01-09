@@ -1,5 +1,4 @@
 import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
 import _ from 'lodash';
@@ -17,12 +16,10 @@ export class BoardService {
     private readonly boardMemberRepository: Repository<BoardMember>,
   ) {}
 
-  async create(createBoardDto: CreateBoardDto, user_id: number) {
-    await this.findOneByTitle(createBoardDto.title); // 제목 중복 여부 체크
-
+  async create(user_id: number) {
     // 보드 정보 저장
     const boardDetail = await this.boardRepository.save({
-      title: createBoardDto.title,
+      title: '새 보드',
       user_id,
     });
 
@@ -33,18 +30,13 @@ export class BoardService {
       role: 0,
     });
 
-    return { message: '보드 저장이 완료되었습니다.', board: { title: createBoardDto.title } };
+    return { message: '보드 저장이 완료되었습니다.', board: { id: boardDetail.id, title: '새 보드' } };
   }
 
   // 보드 목록 조회(보드 멤버들만)
   async findAll(user_id: number) {
     // 로그인 한 사용자의 보드 목록 조회
-    const boards = await this.boardRepository
-      .createQueryBuilder('board')
-      .leftJoin('board.boardMember', 'boardMember')
-      .select(['board.title', 'board.user_id'])
-      .where('boardMember.user_id = :user_id', { user_id })
-      .getMany();
+    const boards = await this.boardRepository.createQueryBuilder('board').leftJoin('board.boardMember', 'boardMember').select(['board.id', 'board.title', 'board.user_id']).where('boardMember.user_id = :user_id', { user_id }).getMany();
 
     // ERR : 포함된 보드가 존재하지 않을 경우
     if (boards.length === 0) {
@@ -62,9 +54,11 @@ export class BoardService {
   }
 
   async update(id: number, updateBoardDto: UpdateBoardDto, user_id: number) {
+    console.log('updateBoardDto: ', updateBoardDto.title);
     await this.findOneBoard(id); // 보드 정보 조회
+
     await this.checkBoardMemberRole(id, user_id); // 로그인 한 사용자의 role 조회
-    await this.findOneByTitle(updateBoardDto.title); // 제목 중복 여부 체크
+    // await this.findOneByTitle(updateBoardDto.title); // 제목 중복 여부 체크
 
     // 보드 정보 업데이트
     const board = await this.boardRepository.update({ id }, { title: updateBoardDto.title });
