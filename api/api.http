@@ -1,16 +1,29 @@
 @domain = http://localhost:4000
 @AccessToken = {{loginToken.response.body.$.access_token}}
+###
+# 회원가입
+# 관리자 회원
+POST {{domain}}/user/signup
+Content-Type: application/json
 
-### 
+{
+	"email":"admin@gmail.com",
+	"password":"test_pw",
+  	"role":1,
+	"name" : "이름"
+}
+
+###
 # 회원가입
 # 일반 회원
 POST {{domain}}/user/signup
 Content-Type: application/json
 
 {
-	"email":"test3@test.com",
-	"password":"1234",
-	"name" : "test3"
+	"email":"test1@gmail.com",
+	"password":"test_pw",
+  	"role":0,
+	"name" : "dlfma"
 }
 
 ###
@@ -44,7 +57,7 @@ GET {{domain}}/auth
 Authorization: Bearer {{AccessToken}}
 
 ##### BOARD
-### 
+###
 # 보드 저장
 POST {{domain}}/board
 Authorization: Bearer {{AccessToken}}
@@ -54,19 +67,19 @@ Content-Type: application/json
 	"title":"test2"
 }
 
-### 
+###
 # 보드 목록 조회
 GET {{domain}}/board
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 보드 상세 조회
 GET {{domain}}/board/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 보드 정보 수정
 PATCH {{domain}}/board/1
 Authorization: Bearer {{AccessToken}}
@@ -84,7 +97,7 @@ Content-Type: application/json
 
 ##### COLUMN
 @board_id = 2
-### 
+###
 # 칼럼 저장
 POST {{domain}}/board-column/2
 Authorization: Bearer {{AccessToken}}
@@ -94,19 +107,19 @@ Content-Type: application/json
 	"title":"column7"
 }
 
-### 
+###
 # 칼럼 목록 조회
 GET {{domain}}/board-column/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 칼럼 상세 조회
 GET {{domain}}/board-column/1/3
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 칼럼 정보 수정
 PATCH {{domain}}/board-column/2/2
 Authorization: Bearer {{AccessToken}}
@@ -123,7 +136,7 @@ Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 ##### BOARD_MEMBER
-### 
+###
 # 보드 멤버 저장
 POST {{domain}}/board-member/1
 Authorization: Bearer {{AccessToken}}
@@ -134,19 +147,19 @@ Content-Type: application/json
 	"role": 2
 }
 
-### 
+###
 # 보드 멤버 목록 조회
 GET {{domain}}/board-member/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 보드 멤버 상세 조회
 GET {{domain}}/board-member/1/1
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
-### 
+###
 # 보드 멤버 수정
 PATCH {{domain}}/board-member/1/1
 Authorization: Bearer {{AccessToken}}
