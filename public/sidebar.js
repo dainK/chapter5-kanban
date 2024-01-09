@@ -4,17 +4,19 @@ import { showLoginModal, showSignupModal } from "./user.js";
 // Sidebar 생성
 export function initailizeSideBar() {
   createSidebar();
-  showSidebarState(true);
+  showSidebarState(false);
 }
 
-export function showSidebarState(islogin) {
-  if (islogin) {
+export function showSidebarState() {
+  const accessToken = localStorage.getItem('access_token');
+  if (accessToken !== null) {
     showSideStatelogin();
     loadBoardList();
   } else {
     showSideStatelogout();
   }
 }
+
 
 
 
@@ -98,7 +100,10 @@ function createSidebar() {
   const logoutButton = document.createElement("button");
   logoutButton.id = "logout-button";
   logoutButton.textContent = "로그아웃";
-  // logoutButton.addEventListener("click", showLoginModal);
+  logoutButton.addEventListener("click", ()=>{
+    localStorage.removeItem('access_token');
+    location.reload();
+  });
   userbox.appendChild(logoutButton);
 
   // 프로필보기 버튼 생성
