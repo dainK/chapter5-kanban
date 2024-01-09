@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,6 +27,10 @@ export class UserService {
     const existingName = await this.findOneByName(createDto.name);
     if (existingName) {
       throw new ConflictException('이미 해당 이름으로 가입된 사용자가 있습니다!');
+    }
+
+    if (createDto.password !== createDto.passwordConfirm) {
+      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
     }
 
     const hashedPassword = await hash(createDto.password, 10);

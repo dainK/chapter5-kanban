@@ -5,26 +5,29 @@ export function initializeModals() {
   hideSignupModal();
 }
 
+// 로그인 모달 활성화
 export function showLoginModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("login-container").style.display = "block";
 }
 
+// 로그인 모달 비활성화
 function hideLoginModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("login-container").style.display = "none";
 }
 
+// 회원가입 모달 활성화
 export function showSignupModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("signup-container").style.display = "block";
 }
 
+// 회원가입 모달 비활성화
 function hideSignupModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("signup-container").style.display = "none";
 }
-
 
 // 입력 폼 그룹 생성
 function createFormGroup(labelText, inputId, inputType, placeholder) {
@@ -87,26 +90,24 @@ function createLoginModal() {
   loginButton.id = "login-btn";
   loginButton.textContent = "로그인";
   loginForm.appendChild(loginButton);
-  loginButton.addEventListener("click",()=>{
-    
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
+  loginButton.addEventListener("click", () => {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
     axios.post('/user/login', { email, password })
-    .then(response => {
-      console.log(response.data);
+      .then(response => {
+        console.log(response.data);
 
-      const { access_token } = response.data;
-      localStorage.setItem('access_token', access_token);
+        const { access_token } = response.data;
+        localStorage.setItem('access_token', access_token);
 
-      hideLoginModal();
-      location.reload();
-    })
-    .catch(error => {
-      console.error(error);
-      // 에러 처리
-    });
-  } );
-
+        hideLoginModal();
+        location.reload();
+      })
+      .catch(error => {
+        console.error(error);
+        // 에러 처리
+      });
+  });
 }
 
 function createSignupModal() {
@@ -145,16 +146,47 @@ function createSignupModal() {
     "비밀번호 확인"
   );
 
+  // 입력 폼 그룹 생성 및 추가 - 이름
+  const nameGroup = createFormGroup(
+    "이름",
+    "signup-name",
+    "test",
+    "이름"
+  );
   // 회원가입 버튼 생성
   const signupBtn = document.createElement("button");
   signupBtn.id = "signup-btn";
   signupBtn.textContent = "회원가입";
-  // signupBtn.addEventListener("click", );
+
+  // 회원가입 API
+  signupBtn.addEventListener("click", () => {
+    console.log("회원가입 버튼 클릭");
+    const email = document.getElementById('signup-id').value;
+    const password = document.getElementById('signup-password').value;
+    const passwordConfirm = document.getElementById('signup-passwordconfirm').value;
+    const name = document.getElementById('signup-name').value;
+
+    axios.post('/user/signup', { email, password, passwordConfirm, name })
+      .then(response => {
+        console.log(response.data);
+
+        hideLoginModal();
+        location.reload();
+      })
+      .catch(error => {
+        console.error(error);
+        alert(error.response.data.message);
+        // 에러 처리
+        // 비밀번호 오류 체크하기
+
+      });
+  });
 
   // 자식 요소들을 추가
   form.appendChild(idGroup);
   form.appendChild(passwordGroup);
   form.appendChild(passwordConfirmGroup);
+  form.appendChild(nameGroup);
   form.appendChild(signupBtn);
 
   signupContainer.appendChild(closeBtn);

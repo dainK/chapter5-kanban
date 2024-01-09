@@ -10,6 +10,10 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
+  @IsNotEmpty({ message: '비밀번호 확인을 입력해주세요.' })
+  passwordConfirm: string;
+
+  @IsString()
   @IsNotEmpty({ message: '이름을 입력해주세요' })
   name: string;
 }
