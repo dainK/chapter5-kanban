@@ -2,6 +2,77 @@ import { createColumn } from "./column.js";
 import { value } from "./value.js";
 
 export function initializeBoard() {
+  initailizeBoardTitle();
+  initailizeBoardBody();
+}
+
+// export function moveAddColumButton() {
+//   // const button = document.getElementById("add-column-btn");
+//   // document.getElementById("board").appendChild(button);
+// }
+
+function initailizeBoardTitle() {
+  const boardname = document.getElementById("board-name");
+
+  const clickableDiv = document.createElement("a");
+  clickableDiv.innerText = value.boardName;
+  clickableDiv.id = "board-title";
+  clickableDiv.classList.add("clickable-item");
+
+  // 클릭 이벤트 리스너 추가
+  clickableDiv.addEventListener("click", function (e) {
+    // 클릭 시 수정 가능한 입력 상자로 변경
+    const inputElement = document.createElement("input");
+    inputElement.type = "text";
+    inputElement.value = clickableDiv.innerText;
+
+    // 입력 상자 상태 변경
+    // 제목이 ''이 아닌 값으로 변경되었을 때에만 보드 정보 수정
+    inputElement.addEventListener("keydown", function (event) {
+      // 엔터 키를 누르면 변경된 내용을 적용하고 입력 상자 제거
+      if (event.key === "Enter") {
+        if (inputElement.value !== '' && inputElement.value !== value.boardName) {
+          updateBoard(value.boardId, inputElement.value); // 보드 정보 수정
+          value.boardName = inputElement.value; // title 값 갱신
+          clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
+          event.target.remove();
+        }
+        // 보드 제목을 변경하지 않았을 경우
+        if (inputElement.value === '' || inputElement.value === value.boardName) {
+          clickableDiv.innerText = value.boardName;
+          event.target.remove();
+        }
+      }
+    });
+
+    inputElement.addEventListener("blur", function (event) {
+      // 입력 상자에서 포커스가 벗어날 때, 변경된 내용을 적용하고 입력 상자 제거
+      if (inputElement.value !== '' && inputElement.value !== value.boardName) {
+        updateBoard(value.boardId, inputElement.value); // 보드 정보 수정
+        value.boardName = inputElement.value; // title 값 갱신
+        clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
+        event.target.remove();
+      }
+      // 보드 제목을 변경하지 않았을 경우
+      if (inputElement.value === '' || inputElement.value === value.boardName) {
+        clickableDiv.innerText = value.boardName;
+        event.target.remove();
+      }
+    });
+
+    // 기존 텍스트 숨김
+    clickableDiv.innerText = "";
+
+    // 입력 상자 추가
+    clickableDiv.appendChild(inputElement);
+    inputElement.focus();
+  });
+
+  // 부모 요소에 클릭 가능한 div 추가
+  boardname.appendChild(clickableDiv);
+}
+
+function initailizeBoardBody() {
   const main = document.getElementById("main");
 
   const board = document.createElement("div");
@@ -57,14 +128,10 @@ export function initializeBoard() {
   }
 }
 
-// export function moveAddColumButton() {
-//   // const button = document.getElementById("add-column-btn");
-//   // document.getElementById("board").appendChild(button);
-// }
-
-export function loadboard() {
-  const boardname = document.getElementById("board-name");
-  // 보드이름
+export function loadboard( board_id ) {
+  value.boardId = board_id;
+  value.boardName = "qhemdlfma";
+  document.getElementById("board-title").innerText = value.boardName;
 }
 
 // 보드 목록 조회
@@ -150,6 +217,7 @@ async function updateBoard(board_id, title) {
   )
     .then(response => {
       console.log('response: ', response);
+      loadBoardList();
     })
     .catch(error => {
       console.log('error: ', error);
@@ -167,51 +235,7 @@ async function drawBoard(board_id, title) {
 
   // 클릭 이벤트 리스너 추가
   clickableDiv.addEventListener("click", function (e) {
-    // 클릭 시 수정 가능한 입력 상자로 변경
-    const inputElement = document.createElement("input");
-    inputElement.type = "text";
-    inputElement.value = clickableDiv.innerText;
-
-    // 입력 상자 상태 변경
-    // 제목이 ''이 아닌 값으로 변경되었을 때에만 보드 정보 수정
-    inputElement.addEventListener("keydown", function (event) {
-      // 엔터 키를 누르면 변경된 내용을 적용하고 입력 상자 제거
-      if (event.key === "Enter") {
-        if (inputElement.value !== '' && inputElement.value !== title) {
-          updateBoard(board_id, inputElement.value); // 보드 정보 수정
-          title = inputElement.value; // title 값 갱신
-          clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
-          event.target.remove();
-        }
-        // 보드 제목을 변경하지 않았을 경우
-        if (inputElement.value === '' || inputElement.value === title) {
-          clickableDiv.innerText = title;
-          event.target.remove();
-        }
-      }
-    });
-
-    inputElement.addEventListener("blur", function (event) {
-      // 입력 상자에서 포커스가 벗어날 때, 변경된 내용을 적용하고 입력 상자 제거
-      if (inputElement.value !== '' && inputElement.value !== title) {
-        updateBoard(board_id, inputElement.value); // 보드 정보 수정
-        title = inputElement.value; // title 값 갱신
-        clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
-        event.target.remove();
-      }
-      // 보드 제목을 변경하지 않았을 경우
-      if (inputElement.value === '' || inputElement.value === title) {
-        clickableDiv.innerText = title;
-        event.target.remove();
-      }
-    });
-
-    // 기존 텍스트 숨김
-    clickableDiv.innerText = "";
-
-    // 입력 상자 추가
-    clickableDiv.appendChild(inputElement);
-    inputElement.focus();
+    loadboard(board_id);
   });
 
   // 부모 요소에 클릭 가능한 div 추가

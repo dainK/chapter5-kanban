@@ -214,6 +214,20 @@ button:hover {
   overflow-x: auto;
   width: 90%;
 }
+#board-title input {
+  box-sizing: border-box;
+  width: calc(100% - 10px);
+  padding: 5px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+#board-title input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
 .column {
   background-color: white;
   border-radius: 4px;

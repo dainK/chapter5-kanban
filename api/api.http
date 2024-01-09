@@ -22,6 +22,7 @@ Content-Type: application/json
 {
 	"email":"test1@gmail.com",
 	"password":"test_pw",
+	"passwordConfirm":"test_pw",
   	"role":0,
 	"name" : "dlfma"
 }

@@ -1,7 +1,9 @@
 export const value = {
   cardColumnId : null,
   draggedcardItem : null,
-  draggedcolumnItem : null
+  draggedcolumnItem : null,
+  boardName : null,
+  boardId : null,
 }
 
 // export let cardColumnId = null;
