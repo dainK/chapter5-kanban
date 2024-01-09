@@ -98,7 +98,7 @@ function createLoginModal() {
       const { access_token } = response.data;
       localStorage.setItem('access_token', access_token);
 
-      // hideLoginModal();
+      hideLoginModal();
       location.reload();
     })
     .catch(error => {
@@ -117,7 +117,7 @@ function createSignupModal() {
   const closeBtn = document.createElement("span");
   closeBtn.id = "close-btn";
   closeBtn.innerHTML = "&times;";
-  closeBtn.onclick = hideLoginModal; // closeModal 함수를 클릭 이벤트에 연결
+  closeBtn.onclick = hideSignupModal; // closeModal 함수를 클릭 이벤트에 연결
 
   // column-header 생성
   const columnHeader = document.createElement("div");
