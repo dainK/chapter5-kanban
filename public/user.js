@@ -146,12 +146,12 @@ function createSignupModal() {
     "비밀번호 확인"
   );
 
-  // 입력 폼 그룹 생성 및 추가 - 이름
+  // 입력 폼 그룹 생성 및 추가 - 닉네임
   const nameGroup = createFormGroup(
-    "이름",
+    "닉네임",
     "signup-name",
     "test",
-    "이름"
+    "닉네임"
   );
   // 회원가입 버튼 생성
   const signupBtn = document.createElement("button");
@@ -160,7 +160,6 @@ function createSignupModal() {
 
   // 회원가입 API
   signupBtn.addEventListener("click", () => {
-    console.log("회원가입 버튼 클릭");
     const email = document.getElementById('signup-id').value;
     const password = document.getElementById('signup-password').value;
     const passwordConfirm = document.getElementById('signup-passwordconfirm').value;
