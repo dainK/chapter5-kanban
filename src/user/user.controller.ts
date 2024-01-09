@@ -55,11 +55,11 @@ export class UserController {
     return this.userService.update(req.user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    await this.userService.remove(+id);
-    // 프론트에서 로컬스토리지에 저장한 액세스 토큰을 지워줘야 할 것으로 생각 - 이아영
-    await this.redisService.removeRefreshToken(id); // 리프레시 토큰 삭제
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
+  @Delete()
+  async remove(@Req() req) {
+    await this.userService.remove(req.user.id);
+    await this.redisService.removeRefreshToken(req.user.id); // 리프레시 토큰 삭제
     return { message: '회원 탈퇴가 완료되었습니다' };
   }
 }

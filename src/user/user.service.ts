@@ -85,8 +85,10 @@ export class UserService {
     return { user: { title: updateUserDto.name } };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    // 회원 정보 삭제
+    await this.userRepository.delete({ id });
+    return { message: '회원 정보 삭제가 완료되었습니다.' };
   }
 
   async findOneByEmail(email: string): Promise<User | undefined> {

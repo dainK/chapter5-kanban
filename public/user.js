@@ -80,7 +80,28 @@ export async function showProfileModal() {
   withdrawBtn.id = "withdraw-btn";
   withdrawBtn.textContent = "탈퇴하기";
   buttonbox.appendChild(withdrawBtn);
-  // withdrawBtn.addEventListener("click", );
+
+  withdrawBtn.addEventListener("click", () => {
+    if (confirm("보드도 지워집니다 탈퇴하실?")) {
+      // 사용자가 '확인'을 클릭한 경우
+      // 회원 정보 삭제 API
+      axios.delete(`/user`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+          alert("탈퇴가 완료되었습니다.");
+          localStorage.removeItem('access_token');
+          location.reload();
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+    }
+  });
 }
 
 function hideProfileModal() {
@@ -321,14 +342,13 @@ async function createProfileModal() {
       alert(error.response.data.message);
     });
 
-  // 수정 api 버튼
+  // 회원 정보 수정 API
   const editBtn2 = document.createElement("button");
   editBtn2.textContent = "수정하기";
   form.appendChild(editBtn2);
 
   editBtn2.addEventListener("click", () => {
     const name = document.getElementById("profile-name").value;
-    console.log('name: ', name);
     // 보드 정보 수정 API
     axios.patch(`/user`,
       { name },
@@ -345,5 +365,4 @@ async function createProfileModal() {
         alert(error.response.data.message);
       });
   });
-
 }
