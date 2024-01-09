@@ -228,6 +228,14 @@ button:hover {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
+.board-trash-button {
+  position: absolute;
+  /* top: 45px; */
+  right: 20px;
+  transform: translateY(5%);
+  font-size: 20px;
+  cursor: pointer;
+}
 .column {
   background-color: white;
   border-radius: 4px;

@@ -326,21 +326,22 @@ async function createProfileModal() {
   form.classList.add("form");
   editProfile.appendChild(form);
 
-  // 회원 정보 조회 API (기존 이름을 placeholder에 넣는 용도 / 불필요 시 삭제해도 좋습니다 ! - 이아영)
-  const accessToken = await localStorage.getItem('access_token');
-  await axios.get('/user/profile', {
-    headers: { Authorization: `Bearer ${accessToken}` }
-  })
-    .then(response => {
-      const user = response.data.user;
-      // 입력 폼 그룹 생성 및 추가 - 닉네임
-      const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", user.name);
-      form.appendChild(nicknameGroup);
-    })
-    .catch(error => {
-      console.log('error: ', error);
-      alert(error.response.data.message);
-    });
+  // 아영
+  // // 회원 정보 조회 API (기존 이름을 placeholder에 넣는 용도 / 불필요 시 삭제해도 좋습니다 ! - 이아영)
+  // const accessToken = await localStorage.getItem('access_token');
+  // await axios.get('/user/profile', {
+  //   headers: { Authorization: `Bearer ${accessToken}` }
+  // })
+  //   .then(response => {
+  //     const user = response.data.user;
+  //     // 입력 폼 그룹 생성 및 추가 - 닉네임
+  //     const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", user.name);
+  //     form.appendChild(nicknameGroup);
+  //   })
+  //   .catch(error => {
+  //     console.log('error: ', error);
+  //     alert(error.response.data.message);
+  //   });
 
   // 회원 정보 수정 API
   const editBtn2 = document.createElement("button");
