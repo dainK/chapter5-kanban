@@ -20,6 +20,7 @@ Content-Type: application/json
 
 {
     "boardColumnId": 1,
+    "userId": 1,
     "title": "Todo test",
     "content": "Todo test - content",
     "deadLine": "2024-01-28",
@@ -31,27 +32,28 @@ Content-Type: application/json
 GET {{domain}}/card
 Content-Type: application/json
 
+###
+# 특정 컬럼 카드 조회
+# @name loginToken
+GET {{domain}}/card/column/1
+Content-Type: application/json
+
 
 ###
 # 카드 상세 조회
 # @name loginToken
-GET {{domain}}/card/1
+GET {{domain}}/card/2
 Content-Type: application/json
 
 
 ###
 # 카드 수정
-PATCH {{domain}}/card/1
+PATCH {{domain}}/card/2
 # Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "boardColumnId":,
-    "title":,
-    "content":,
-    "deadLine":,
-    "priority":,
-    "index":
+    "index": 0
 }
 
 ###

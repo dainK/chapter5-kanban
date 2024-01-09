@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Card } from 'src/card/entities/card.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('cardMembers')
 export class CardMember {
@@ -10,4 +11,7 @@ export class CardMember {
 
   @Column({ type: 'int', nullable: false })
   user_id: number;
+
+  @ManyToOne(() => Card, (card) => card.cardMembers)
+  card: Card;
 }

@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Level } from '../types/cardLevel.type';
+import { CardMember } from 'src/card-member/entities/card-member.entity';
 
 @Entity('cards')
 export class Card {
@@ -35,4 +36,7 @@ export class Card {
   // task의 중요도에 따라 우선순위에 차등을 둔다. (HIGH, MEDIUM, LOW)
   @Column({ type: 'enum', enum: Level, nullable: false })
   priority: Level;
+
+  @OneToMany(() => CardMember, (cardMember) => cardMember.card_id, { onDelete: 'CASCADE' })
+  cardMembers: CardMember[];
 }
