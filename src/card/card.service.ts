@@ -28,16 +28,14 @@ export class CardService {
 
   async getOrder(boardColumnId: number) {
     const cards = await this.cardRepository.findBy({ board_column_id: boardColumnId });
-    if (!cards) {
+    if (!cards.length) {
       const order = LexoRank.middle().toString();
       return order;
     }
-    let max = LexoRank.min().toString();
-    cards.map((card) => {
-      if (max <= card.order) max = card.order;
-      const order = LexoRank.parse(max).genNext().toString();
-      return order;
-    });
+    const max = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'DESC').getOne();
+
+    const order = LexoRank.parse(max.order).genNext().toString();
+    return order;
   }
 
   async findAll() {
@@ -55,41 +53,65 @@ export class CardService {
     });
   }
 
+  async findAllByColumnId(boardColumnId: number) {
+    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
+
+    return cards.map((card) => {
+      return {
+        id: card.id,
+        title: card.title,
+        user_id: card.user_id,
+        dead_line: card.dead_line,
+        priority: card.priority,
+        order: card.order,
+      };
+    });
+  }
+
   async findOne(id: number) {
     return await this.cardRepository.findOneBy({ id: id });
   }
 
   async update(id: number, updateCardDto: UpdateCardDto) {
     const newOrder = await this.getNewOrder(updateCardDto.boardColumnId, updateCardDto.index);
-    await this.cardRepository.update({ id: id }, { order: newOrder });
+    console.log('newOrder >> ', newOrder);
 
-    return await this.cardRepository.update({ id: id }, updateCardDto);
+    const card = await this.findOne(id);
+    card.order = newOrder;
+
+    Object.assign(card, updateCardDto);
+
+    return await this.cardRepository.save(card);
   }
 
   async getNewOrder(boardColumnId: number, index: number) {
-    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id = boardColumnId', { boardColumnId }).orderBy('card.order', 'ASC').getMany();
+    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
 
-    const aboveCard = cards[index];
-    const belowCard = cards[index + 1];
+    // cards의 0번째 order의 앞순서가 최소lexorank보다 작거나 cards의 마지막 order의 다음순서가 최대lexorank보다 크면 재정렬하기
+    if (LexoRank.parse(cards[0].order).genPrev() >= LexoRank.min() || LexoRank.parse(cards[cards.length - 1].order).genNext() <= LexoRank.max()) this.reOrdering(boardColumnId);
 
-    if (!aboveCard) {
-      const aboveOrder = LexoRank.parse(belowCard.order);
-      if (aboveOrder === LexoRank.min()) this.reOrdering(boardColumnId);
-      return aboveOrder.genPrev().toString();
+    // index가 cards의 길이보다 크면(이동하려는 위치가 마지막카드보다 뒤면) 가장 마지막 카드의 다음 순서로 order 지정
+    if (index > cards.length - 1) {
+      return LexoRank.parse(cards[cards.length - 1].order)
+        .genNext()
+        .toString();
     }
 
-    if (!belowCard) {
-      const belowOrder = LexoRank.parse(aboveCard.order);
-      if (belowOrder === LexoRank.max()) this.reOrdering(boardColumnId);
-      return belowOrder.genNext().toString();
-    }
+    // index가 0(가장 처음 위치)이면 aboveCard = null, index + 1이 마지막위치 이후면 belowCard = null
+    const aboveCard = index > 0 ? cards[index] : null;
+    const belowCard = index + 1 < cards.length - 1 ? cards[index + 1] : null;
+    console.log('aboveCard >> ', aboveCard);
+    console.log('belowCard >> ', belowCard);
+
+    if (!aboveCard) return LexoRank.parse(belowCard.order).genPrev().toString();
+    if (!belowCard) return LexoRank.parse(aboveCard.order).genNext().toString();
 
     const newOrder = LexoRank.parse(aboveCard.order).between(LexoRank.parse(belowCard.order)).toString();
     return newOrder;
   }
 
   async reOrdering(boardColumnId) {
-    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id = boardColumnId', { boardColumnId }).orderBy('card.order', 'ASC').getMany();
+    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
 
     let newLexoRank = LexoRank.middle();
     for (let i = 0; i < cards.length; i++) {
