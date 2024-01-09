@@ -6,10 +6,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
   root: true,
   env: {
     node: true,
@@ -31,7 +28,7 @@ module.exports = {
         tabWidth: 2,
         trailingComma: "all",
         printWidth: 3000,
-        bracketSpacing: true
+        bracketSpacing: true,
       },
     ],
   },
