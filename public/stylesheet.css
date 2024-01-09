@@ -146,6 +146,7 @@ button:hover {
 #task-container,
 #submit-container,
 #signup-container,
+#profile-container,
 #login-container {
   background: #fff;
   padding: 20px;
