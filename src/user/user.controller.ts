@@ -38,9 +38,16 @@ export class UserController {
     return await this.userService.findOne(req.user.id);
   }
 
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
+  @Get('list/:userKeyword')
+  searchAll(@Param('userKeyword') userKeyword: string) {
+    return this.userService.searchAll(userKeyword);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)

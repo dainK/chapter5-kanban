@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, UnauthorizedExcepti
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
@@ -71,8 +71,21 @@ export class UserService {
     };
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    // 유저 목록 조회
+    const users = await this.userRepository.find();
+
+    return { users };
+  }
+
+  async searchAll(userKeyword: string) {
+    const keywordPattern = `%${userKeyword}%`;
+    // 칼럼 목록 조회
+    const users = await this.userRepository.find({
+      where: [{ name: Like(keywordPattern) }, { email: Like(keywordPattern) }],
+    });
+
+    return { users };
   }
 
   async findOne(id: number) {

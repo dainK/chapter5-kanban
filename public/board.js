@@ -4,6 +4,8 @@ import { value } from './value.js';
 export function initializeBoard() {
   initailizeBoardTitle();
   initailizeBoardBody();
+  createInviteUserListModal();
+  test();
 }
 
 // export function moveAddColumButton() {
@@ -264,7 +266,6 @@ async function drawBoard(boardId, title) {
       // 사용자가 '확인'을 클릭한 경우
       // 보드 정보 삭제 API
       const accessToken = localStorage.getItem('access_token');
-
       axios.delete(`/board/${boardId}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` }
@@ -286,3 +287,217 @@ async function drawBoard(boardId, title) {
   // 부모 요소에 클릭 가능한 div 추가
   boardList.appendChild(clickableDiv);
 }
+
+function test() {
+  const inviteUserListSearchBtn = document.getElementById("invite-user-list-search");
+  inviteUserListSearchBtn.addEventListener('click', function () {
+    console.log("버튼눌림!");
+    showInviteUserListModal();
+  });
+}
+
+// 로그인 모달 활성화
+export function showInviteUserListModal() {
+  document.getElementById("modal-container").style.display = "flex";
+  document.getElementById("invite-user-list-container").style.display = "block";
+}
+
+// 로그인 모달 비활성화
+function hideInviteUserListModal() {
+  document.getElementById("modal-container").style.display = "none";
+  document.getElementById("invite-user-list-container").style.display = "none";
+}
+
+
+// 1. 검색 모달 만들기
+// 입력 폼 그룹 생성
+function createFormGroup(labelText, inputId, inputType, placeholder) {
+  const group = document.createElement("div");
+  group.classList.add("group");
+
+  const label = document.createElement("label");
+  label.setAttribute("for", inputId);
+  label.textContent = labelText;
+
+  const input = document.createElement("input");
+  input.classList.add("input");
+  input.type = inputType;
+  input.id = inputId;
+  input.placeholder = placeholder;
+
+  group.appendChild(label);
+  group.appendChild(input);
+
+  return group;
+}
+
+// 보드 유저 초대 검색 모달 생성
+function createInviteUserListModal() {
+  // 모달 컨테이너 생성
+  const modalContainer = document.createElement("div");
+  modalContainer.id = "invite-user-list-container";
+  modalContainer.classList.add("modal-container");
+  document.getElementById("modal-container").appendChild(modalContainer);
+
+  // 닫기 버튼 생성
+  const closeButton = document.createElement("span");
+  closeButton.id = "close-btn";
+  closeButton.textContent = "×";
+  closeButton.onclick = hideInviteUserListModal; // closeModal 함수를 클릭 이벤트에 연결
+  modalContainer.appendChild(closeButton);
+
+  // 모달 헤더 생성
+  const modalHeader = document.createElement("div");
+  modalHeader.classList.add("column-header");
+  modalHeader.textContent = "사용자 목록 조회";
+  modalContainer.appendChild(modalHeader);
+
+  // 로그인 폼 생성
+  const inviteUserListForm = document.createElement("div");
+  inviteUserListForm.classList.add("form");
+  modalContainer.appendChild(inviteUserListForm);
+
+  // 사용자 검색 폼
+  const inviteUserListSearchGroup = createFormGroup("", "invite-user-search-input", "text", "사용자 이름 또는 이메일로 검색");
+  inviteUserListForm.appendChild(inviteUserListSearchGroup);
+
+  // 사용자 목록 Ul
+  const inviteUserListUl = document.createElement("ul");
+  inviteUserListUl.id = "invite-user-search-results";
+  modalContainer.appendChild(inviteUserListUl);
+
+  // 현재 보드 번호 받아와야함
+  // 어디서 ?
+
+  const userKeyword = document.getElementById('invite-user-search-input');
+  userKeyword.addEventListener("input", () => {
+    if (userKeyword.value === "") {
+      // user 목록 조회 API
+      // 현재 보드에 포함 안 된 사람들 목록 뽑아야함 ㅠㅠ
+      // 코드 더러워지는거 어케 함수화 해보자..
+      const accessToken = localStorage.getItem('access_token');
+      axios.get(`/user`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+        .then(response => {
+          const users = response.data.users;
+          // 리스트 만들기!!!!!
+          const inviteUserSearchResults = document.getElementById('invite-user-search-results');
+
+          // 검색 결과 목록 초기화
+          inviteUserSearchResults.innerHTML = '';
+
+          // 검색어와 일치하는 사람을 찾아서 결과 목록에 추가
+          users.forEach(person => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('searchResultUser');
+            listItem.textContent = `이메일 : ${person.email} 이름 : ${person.name}`;
+
+            // 초대 버튼 생성
+            const inviteButton = document.createElement('button');
+            inviteButton.textContent = '초대';
+            inviteButton.classList.add('inviteButton');
+
+            // 버튼에 이벤트 리스너 추가 (예: 사용자 초대 함수)
+            inviteButton.addEventListener('click', () => {
+              // 사용자 초대 로직
+              console.log(`사용자 ${person.email}을(를) 초대합니다.`);
+            });
+
+            // 리스트 아이템에 버튼 추가
+            listItem.appendChild(inviteButton);
+
+            // 결과 목록에 리스트 아이템 추가
+            inviteUserSearchResults.appendChild(listItem);
+          });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+    if (userKeyword.value !== "") {
+      // user 목록 검색 API
+      // 현재 보드에 포함 안 된 사람들 목록 뽑아야함 ㅠㅠ
+      const accessToken = localStorage.getItem('access_token');
+      axios.get(`/user/list/${userKeyword.value}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+        .then(response => {
+          const users = response.data.users;
+          // 리스트 만들기!!!!!
+          const inviteUserSearchResults = document.getElementById('invite-user-search-results');
+
+          // 검색 결과 목록 초기화
+          inviteUserSearchResults.innerHTML = '';
+
+          // 검색어와 일치하는 사람을 찾아서 결과 목록에 추가
+          users.forEach(person => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('searchResultUser');
+            listItem.textContent = `이메일 : ${person.email} 이름 : ${person.name}`;
+
+            // 초대 버튼 생성
+            const inviteButton = document.createElement('button');
+            inviteButton.textContent = '초대';
+            inviteButton.classList.add('inviteButton');
+
+            // 버튼에 이벤트 리스너 추가 (예: 사용자 초대 함수)
+            inviteButton.addEventListener('click', () => {
+              // 사용자 초대 로직
+              console.log(`사용자 ${person.email}을(를) 초대합니다.`);
+            });
+
+            // 리스트 아이템에 버튼 추가
+            listItem.appendChild(inviteButton);
+
+            // 결과 목록에 리스트 아이템 추가
+            inviteUserSearchResults.appendChild(listItem);
+          });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+
+  });
+}
+
+// 2. 회원 목록 조회 API 만들기
+// 3. 회원 목록 검색 기능 만들기 - 완료 ~
+// 4. 클릭했을 때 회원 전체 목록 조회 기능 만들기
+// < !--검색 창-- >
+//   <input type="text" id="searchInput" placeholder="이름 검색">
+
+//     // 검색 창과 결과 목록에 대한 참조
+//     const searchInput = document.getElementById('searchInput');
+//     const searchResults = document.getElementById('searchResults');
+
+//     // 검색 창에 입력할 때마다 결과 갱신
+//     searchInput.addEventListener('input', function () {
+//     const searchTerm = searchInput.value.toLowerCase();
+
+//     // 검색 결과 목록 초기화
+//     searchResults.innerHTML = '';
+
+//     // 검색어와 일치하는 사람을 찾아서 결과 목록에 추가
+//     peopleList.forEach(person => {
+//       const lowerCasePerson = person.toLowerCase();
+//     if (lowerCasePerson.includes(searchTerm)) {
+//         const listItem = document.createElement('li');
+//     listItem.classList.add('searchResultItem');
+//     listItem.textContent = person;
+
+//     // 결과 목록에 추가
+//     searchResults.appendChild(listItem);
+//       }
+//     });
+
+//     // 결과 목록 표시/숨김 설정
+// const resultItems = document.querySelectorAll('.searchResultItem');
+// resultItems.forEach(item => {
+//   item.style.display = item.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+// });
+//   });
+
+
+

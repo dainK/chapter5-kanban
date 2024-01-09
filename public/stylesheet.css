@@ -8,7 +8,7 @@ body {
   padding: 0;
   min-height: 100vh;
   width: 100%;
-  font-family: "IBM Plex Sans KR", sans-serif;
+  font-family: 'IBM Plex Sans KR', sans-serif;
   background: linear-gradient(to bottom, #fcfbff, #a4c1ff);
 }
 
@@ -111,7 +111,7 @@ button:hover {
   height: 100vh - 500px;
   overflow-y: auto;
 } */
-.board-list  {
+.board-list {
   height: 70%;
   overflow-y: auto;
   /* background-color: rgb(155, 79, 79); */
@@ -147,7 +147,8 @@ button:hover {
 #submit-container,
 #signup-container,
 #profile-container,
-#login-container {
+#login-container,
+#invite-user-list-container {
   background: #fff;
   padding: 20px;
   border-radius: 5px;
@@ -314,7 +315,7 @@ button:hover {
   height: 100px;
   overflow-y: auto;
 }
-.form input[type="file"] {
+.form input[type='file'] {
   margin-bottom: 10px;
   /* Additional styles for file input, such as appearance and border */
 }
@@ -383,4 +384,24 @@ button:hover {
 }
 .file-input-button:hover {
   opacity: 0.8;
+}
+
+/* 검색 창 스타일 */
+#searchInput {
+  padding: 8px;
+  width: 200px;
+}
+
+/* 검색 결과 목록 스타일 */
+#searchResults {
+  list-style: none;
+  padding: 0;
+}
+
+/* 각 검색 결과 아이템 스타일 */
+.searchResultItem {
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  display: none; /* 초기에는 숨김 */
 }
