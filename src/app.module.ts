@@ -11,6 +11,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from './redis/redis.module';
+import { BoardModule } from './board/board.module';
+import { Board } from './board/entities/board.entity';
+import { BoardMemberModule } from './board-member/board-member.module';
+import { BoardMember } from './board-member/entities/board-member.entity';
+import { BoardColumnModule } from './board-column/board-column.module';
+import { BoardColumn } from './board-column/entities/board-column.entity';
 import { CardModule } from './card/card.module';
 import { Card } from './card/entities/card.entity';
 import { CommentModule } from './comment/comment.module';
@@ -27,7 +33,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, Card, CardMember, Comment],
+    entities: [User, Card, CardMember, Comment, Board, BoardMember, BoardColumn],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -65,6 +71,9 @@ const typeOrmModuleOptions = {
     CardModule,
     CommentModule,
     CardMemberModule,
+    BoardModule,
+    BoardColumnModule,
+    BoardMemberModule,
   ],
   controllers: [],
   providers: [],
