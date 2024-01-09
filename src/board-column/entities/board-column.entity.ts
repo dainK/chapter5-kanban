@@ -3,7 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 import { Board } from 'src/board/entities/board.entity';
 
 @Entity({
-  name: 'board_column', // 테이블 명
+  name: 'board_column', // 테이블 명 
 })
 export class BoardColumn {
   @PrimaryGeneratedColumn()

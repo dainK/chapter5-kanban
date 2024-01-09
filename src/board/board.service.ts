@@ -37,12 +37,6 @@ export class BoardService {
   async findAll(user_id: number) {
     // 로그인 한 사용자의 보드 목록 조회
     const boards = await this.boardRepository.createQueryBuilder('board').leftJoin('board.boardMember', 'boardMember').select(['board.id', 'board.title', 'board.user_id']).where('boardMember.user_id = :user_id', { user_id }).getMany();
-
-    // ERR : 포함된 보드가 존재하지 않을 경우
-    if (boards.length === 0) {
-      throw new NotFoundException('보드가 존재하지 않습니다.');
-    }
-
     return { boards };
   }
 
@@ -54,11 +48,9 @@ export class BoardService {
   }
 
   async update(id: number, updateBoardDto: UpdateBoardDto, user_id: number) {
-    console.log('updateBoardDto: ', updateBoardDto.title);
     await this.findOneBoard(id); // 보드 정보 조회
 
     await this.checkBoardMemberRole(id, user_id); // 로그인 한 사용자의 role 조회
-    // await this.findOneByTitle(updateBoardDto.title); // 제목 중복 여부 체크
 
     // 보드 정보 업데이트
     const board = await this.boardRepository.update({ id }, { title: updateBoardDto.title });

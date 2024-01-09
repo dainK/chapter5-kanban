@@ -20,9 +20,21 @@ export function showSidebarState() {
 
 
 
-function showSideStatelogin() {
-  const text = document.getElementById("sidebar-text");
-  text.innerText = `${"유저"}님 안녕하세요.`;
+async function showSideStatelogin() {
+  // 회원 정보 조회 API
+  const accessToken = await localStorage.getItem('access_token');
+  await axios.get('/user/profile', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  })
+    .then(response => {
+      const user = response.data.user;
+      const text = document.getElementById("sidebar-text");
+      text.innerText = `${user.name}님 안녕하세요.`;
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
   document.getElementById("login-button").style.display = "none";
   document.getElementById("signup-button").style.display = "none";
   document.getElementById("logout-button").style.display = "block";

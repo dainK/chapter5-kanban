@@ -31,22 +31,34 @@ function hideSignupModal() {
   document.getElementById("signup-container").style.display = "none";
 }
 
-export function showProfileModal() {
+export async function showProfileModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("profile-container").style.display = "block";
 
   document.getElementById("profile-header").textContent = "PROFILE";
-  
+
   document.getElementById("profile-edit").style.display = "none";
   const view = document.getElementById("profile-veiw");
-  view.innerHTML =``;
-  view.style.display ='block';
+  view.innerHTML = ``;
+  view.style.display = 'block';
 
-  const emailgroup = createVeiwGroup("이메일", "email.@email.email");
-  view.appendChild(emailgroup);
-  const nicknamegroup = createVeiwGroup("닉네임", "nickname");
-  view.appendChild(nicknamegroup);
-  
+  // 회원 정보 조회 API
+  const accessToken = await localStorage.getItem('access_token');
+  await axios.get('/user/profile', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  })
+    .then(response => {
+      const user = response.data.user;
+      const emailgroup = createVeiwGroup("이메일", user.email);
+      view.appendChild(emailgroup);
+      const nicknamegroup = createVeiwGroup("닉네임", user.name);
+      view.appendChild(nicknamegroup);
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
+
   const buttonbox = document.createElement("div");
   buttonbox.classList.add("button-box");
   view.appendChild(buttonbox);
@@ -56,7 +68,7 @@ export function showProfileModal() {
   editBtn.id = "editProfile-btn";
   editBtn.textContent = "수정하기";
   buttonbox.appendChild(editBtn);
-  editBtn.addEventListener("click", ()=>{
+  editBtn.addEventListener("click", () => {
     document.getElementById("profile-header").textContent = "EDIT PROFILE";
 
     document.getElementById("profile-edit").style.display = "block";
@@ -68,7 +80,28 @@ export function showProfileModal() {
   withdrawBtn.id = "withdraw-btn";
   withdrawBtn.textContent = "탈퇴하기";
   buttonbox.appendChild(withdrawBtn);
-  // withdrawBtn.addEventListener("click", );
+
+  withdrawBtn.addEventListener("click", () => {
+    if (confirm("보드도 지워집니다 탈퇴하실?")) {
+      // 사용자가 '확인'을 클릭한 경우
+      // 회원 정보 삭제 API
+      axios.delete(`/user`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+          alert("탈퇴가 완료되었습니다.");
+          localStorage.removeItem('access_token');
+          location.reload();
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+    }
+  });
 }
 
 function hideProfileModal() {
@@ -260,9 +293,7 @@ function createSignupModal() {
   document.getElementById("modal-container").appendChild(signupContainer);
 }
 
-
-
-function createProfileModal() {
+async function createProfileModal() {
   const profileContainer = document.createElement("div");
   profileContainer.id = "profile-container";
   document.getElementById("modal-container").appendChild(profileContainer);
@@ -272,7 +303,7 @@ function createProfileModal() {
   closeBtn.id = "close-btn";
   closeBtn.innerHTML = "&times;";
   closeBtn.onclick = hideProfileModal;
-  profileContainer.appendChild(closeBtn); 
+  profileContainer.appendChild(closeBtn);
   // column-header 생성
   const columnHeader = document.createElement("div");
   columnHeader.classList.add("column-header");
@@ -295,14 +326,43 @@ function createProfileModal() {
   form.classList.add("form");
   editProfile.appendChild(form);
 
-  // 입력 폼 그룹 생성 및 추가 - 닉네임
-  const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", "닉네임");
-  form.appendChild(nicknameGroup);
+  // 회원 정보 조회 API (기존 이름을 placeholder에 넣는 용도 / 불필요 시 삭제해도 좋습니다 ! - 이아영)
+  const accessToken = await localStorage.getItem('access_token');
+  await axios.get('/user/profile', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  })
+    .then(response => {
+      const user = response.data.user;
+      // 입력 폼 그룹 생성 및 추가 - 닉네임
+      const nicknameGroup = createFormGroup("닉네임", "profile-name", "text", user.name);
+      form.appendChild(nicknameGroup);
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
 
-  // 수정 api 버튼
+  // 회원 정보 수정 API
   const editBtn2 = document.createElement("button");
   editBtn2.textContent = "수정하기";
   form.appendChild(editBtn2);
-  // editBtn2.addEventListener("click", );
 
+  editBtn2.addEventListener("click", () => {
+    const name = document.getElementById("profile-name").value;
+    // 보드 정보 수정 API
+    axios.patch(`/user`,
+      { name },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      }
+    )
+      .then(response => {
+        console.log('response: ', response);
+        alert("수정이 완료되었습니다.");
+      })
+      .catch(error => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
+  });
 }

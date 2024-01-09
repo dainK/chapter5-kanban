@@ -75,16 +75,20 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    return { user };
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.update({ id }, { name: updateUserDto.name });
+    return { user: { title: updateUserDto.name } };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    // 회원 정보 삭제
+    await this.userRepository.delete({ id });
+    return { message: '회원 정보 삭제가 완료되었습니다.' };
   }
 
   async findOneByEmail(email: string): Promise<User | undefined> {
