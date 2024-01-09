@@ -52,45 +52,61 @@ function createLoginModal() {
   const modalContainer = document.createElement("div");
   modalContainer.id = "login-container";
   modalContainer.classList.add("modal-container");
+  document.getElementById("modal-container").appendChild(modalContainer);
 
   // 닫기 버튼 생성
   const closeButton = document.createElement("span");
   closeButton.id = "close-btn";
   closeButton.textContent = "×";
   closeButton.onclick = hideLoginModal; // closeModal 함수를 클릭 이벤트에 연결
+  modalContainer.appendChild(closeButton);
 
   // 모달 헤더 생성
   const modalHeader = document.createElement("div");
   modalHeader.classList.add("column-header");
   modalHeader.textContent = "LOGIN";
+  modalContainer.appendChild(modalHeader);
 
   // 로그인 폼 생성
   const loginForm = document.createElement("div");
   loginForm.classList.add("form");
+  modalContainer.appendChild(loginForm);
 
-  const idGroup = createFormGroup("아이디", "login-id", "text", "아이디");
+  const idGroup = createFormGroup("이메일", "login-email", "text", "이메일");
+  loginForm.appendChild(idGroup);
   const passwordGroup = createFormGroup(
     "비밀번호",
     "login-password",
     "password",
     "비밀번호"
   );
+  loginForm.appendChild(passwordGroup);
 
   // 로그인 버튼 생성
   const loginButton = document.createElement("button");
   loginButton.id = "login-btn";
   loginButton.textContent = "로그인";
-  // loginButton.addEventListener("click", );
-
-  // 모달에 요소들 추가
-  modalContainer.appendChild(closeButton);
-  modalContainer.appendChild(modalHeader);
-  loginForm.appendChild(idGroup);
-  loginForm.appendChild(passwordGroup);
   loginForm.appendChild(loginButton);
-  modalContainer.appendChild(loginForm);
+  loginButton.addEventListener("click",()=>{
+    
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+    axios.post('/user/login', { email, password })
+    .then(response => {
+      console.log(response.data);
 
-  document.getElementById("modal-container").appendChild(modalContainer);
+      const { access_token } = response.data;
+      localStorage.setItem('access_token', access_token);
+
+      hideLoginModal();
+      location.reload();
+    })
+    .catch(error => {
+      console.error(error);
+      // 에러 처리
+    });
+  } );
+
 }
 
 function createSignupModal() {
@@ -101,7 +117,7 @@ function createSignupModal() {
   const closeBtn = document.createElement("span");
   closeBtn.id = "close-btn";
   closeBtn.innerHTML = "&times;";
-  closeBtn.onclick = hideLoginModal; // closeModal 함수를 클릭 이벤트에 연결
+  closeBtn.onclick = hideSignupModal; // closeModal 함수를 클릭 이벤트에 연결
 
   // column-header 생성
   const columnHeader = document.createElement("div");
