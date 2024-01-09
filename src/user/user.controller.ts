@@ -39,15 +39,15 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Get(':boardId')
+  findAll(@Param('boardId') boardId: number) {
+    return this.userService.findAll(boardId);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
-  @Get('list/:userKeyword')
-  searchAll(@Param('userKeyword') userKeyword: string) {
-    return this.userService.searchAll(userKeyword);
+  @Get('list/:boardId/:userKeyword')
+  searchAll(@Param('boardId') boardId: number, @Param('userKeyword') userKeyword: string) {
+    return this.userService.searchAll(boardId, userKeyword);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)

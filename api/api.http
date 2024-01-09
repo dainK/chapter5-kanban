@@ -47,6 +47,20 @@ Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 ###
+# 사용자 목록 전체 조회
+# 이 요청은 모든 사용자의 정보를 조회합니다. (인증 토큰 필요)
+GET {{domain}}/user/1
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+###
+# 사용자 목록 검색 조회
+# 이 요청은 검색된 사용자의 정보를 조회합니다. (인증 토큰 필요)
+GET {{domain}}/user/list/1/2
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+###
 # 사용자 정보 조회
 # 이 요청은 현재 로그인된 사용자의 정보를 조회합니다. (인증 토큰 필요)
 GET {{domain}}/user/profile

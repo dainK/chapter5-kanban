@@ -2,8 +2,9 @@ import { BadRequestException, ConflictException, Injectable, UnauthorizedExcepti
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
@@ -14,6 +15,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(BoardMember)
+    private boardMemberRepository: Repository<BoardMember>,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
   ) {}
@@ -71,19 +74,26 @@ export class UserService {
     };
   }
 
-  async findAll() {
+  async findAll(boardId: number) {
     // 유저 목록 조회
-    const users = await this.userRepository.find();
+    // const users = await this.userRepository.find();
 
+    const users = await this.userRepository.createQueryBuilder('user').leftJoinAndSelect('user.boardMember', 'boardMember').where('boardMember.board_id IS NULL').select(['user.id', 'user.email', 'user.name']).getMany();
     return { users };
   }
 
-  async searchAll(userKeyword: string) {
+  async searchAll(boardId: number, userKeyword: string) {
     const keywordPattern = `%${userKeyword}%`;
     // 칼럼 목록 조회
-    const users = await this.userRepository.find({
-      where: [{ name: Like(keywordPattern) }, { email: Like(keywordPattern) }],
-    });
+    const users = await this.userRepository.createQueryBuilder('user')
+    .leftJoinAndSelect('user.boardMember', 'boardMember')
+    .where('boardMember.board_id IS NULL')
+    .andWhere(new Brackets(qb => {
+      qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${userKeyword}%` })
+        .orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${userKeyword}%` })
+    }))
+    .select(['user.id', 'user.email', 'user.name'])
+    .getMany();
 
     return { users };
   }
