@@ -67,6 +67,7 @@ export function loadboard() {
   // 보드이름
 }
 
+// 보드 목록 조회
 export async function loadBoardList() {
   const boardList = document.getElementById("board-list");
   const accessToken = await localStorage.getItem('access_token');
@@ -75,14 +76,14 @@ export async function loadBoardList() {
   // text.innerText = `내 보드 목록`;
   // boardList.appendChild(text);
 
-  // 보드 목록 조회
+  // 보드 목록 조회 API
   await axios.get('/board', {
     headers: { Authorization: `Bearer ${accessToken}` }
   })
     .then(response => {
       const boards = response.data.boards;
       boards.forEach((element) => {
-        drawBoard(element.board_id, element.title);
+        drawBoard(element.id, element.title);
       });
     })
     .catch(error => {
@@ -95,7 +96,7 @@ export async function loadBoardList() {
 
 async function createBoard() {
   const accessToken = await localStorage.getItem('access_token');
-  // 보드 정보 저장
+  // 보드 정보 저장 API
   await axios.post('/board',
     {},
     {
@@ -116,11 +117,12 @@ async function createBoard() {
     });
 }
 
+// 보드 생성 버튼 그리기
 async function drawPlusBoard(status) {
   const boardList = document.getElementById("board-list");
   const prePlusBtn = document.getElementById("board-plus");
 
-  // 보드를 저장했을 경우 플러스 버튼 재생성
+  // 보드를 저장했을 경우 플러스 버튼 삭제 후 재생성
   if (status === 'create') prePlusBtn.remove();
 
   const plus = document.createElement("a");
@@ -136,6 +138,26 @@ async function drawPlusBoard(status) {
   });
 }
 
+async function updateBoard(board_id, title) {
+  const accessToken = await localStorage.getItem('access_token');
+
+  // 보드 정보 수정 API
+  await axios.patch(`/board/${board_id}`,
+    { title },
+    {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    }
+  )
+    .then(response => {
+      console.log('response: ', response);
+    })
+    .catch(error => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
+}
+
+// 보드 그리기
 async function drawBoard(board_id, title) {
   const boardList = document.getElementById("board-list");
 
@@ -150,22 +172,38 @@ async function drawBoard(board_id, title) {
     inputElement.type = "text";
     inputElement.value = clickableDiv.innerText;
 
+    // 입력 상자 상태 변경
+    // 제목이 ''이 아닌 값으로 변경되었을 때에만 보드 정보 수정
     inputElement.addEventListener("keydown", function (event) {
       // 엔터 키를 누르면 변경된 내용을 적용하고 입력 상자 제거
       if (event.key === "Enter") {
-        clickableDiv.innerText = inputElement.value;
-        // clickableDiv.removeChild(inputElement);
-        // event.target.parentNode.removeChild(event.target);
-        event.target.remove();
+        if (inputElement.value !== '' && inputElement.value !== title) {
+          updateBoard(board_id, inputElement.value); // 보드 정보 수정
+          title = inputElement.value; // title 값 갱신
+          clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
+          event.target.remove();
+        }
+        // 보드 제목을 변경하지 않았을 경우
+        if (inputElement.value === '' || inputElement.value === title) {
+          clickableDiv.innerText = title;
+          event.target.remove();
+        }
       }
     });
 
     inputElement.addEventListener("blur", function (event) {
       // 입력 상자에서 포커스가 벗어날 때, 변경된 내용을 적용하고 입력 상자 제거
-      clickableDiv.innerText = inputElement.value;
-      // clickableDiv.removeChild(inputElement);
-      // event.target.parentNode.removeChild(event.target);
-      event.target.remove();
+      if (inputElement.value !== '' && inputElement.value !== title) {
+        updateBoard(board_id, inputElement.value); // 보드 정보 수정
+        title = inputElement.value; // title 값 갱신
+        clickableDiv.innerText = inputElement.value; // clickableDiv.innerText 값 갱신
+        event.target.remove();
+      }
+      // 보드 제목을 변경하지 않았을 경우
+      if (inputElement.value === '' || inputElement.value === title) {
+        clickableDiv.innerText = title;
+        event.target.remove();
+      }
     });
 
     // 기존 텍스트 숨김
