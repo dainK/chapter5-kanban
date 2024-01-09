@@ -13,8 +13,8 @@ export class Card {
   board_column_id: number;
 
   // task 담당자 id 배열
-  @Column({ type: 'int', array: true, nullable: false })
-  user_id: number[];
+  @Column({ type: 'int', nullable: false })
+  user_id: number;
 
   // task 카드 생성, 수정 시 카드의 순서를 저장할 컬럼
   // JIRA의 LexoRank를 이용해볼 예정이다.

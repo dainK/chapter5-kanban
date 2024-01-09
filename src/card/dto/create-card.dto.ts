@@ -6,7 +6,7 @@ export class CreateCardDto {
   boardColumnId: number;
 
   @IsNotEmpty()
-  userId: number[];
+  userId: number;
 
   @IsString()
   @IsNotEmpty()
