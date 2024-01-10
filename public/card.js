@@ -54,6 +54,10 @@ function showEditTaskModal() {
 function showVeiwTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("task-container").style.display = "block";
+
+  const taskbox = document.getElementById("task-box");
+  const commentsbox = document.getElementById("comment-box");
+  // commentsbox.offsetHeight= taskbox.offsetHeight;
 }
 
 // 카드 조회 모달 비활성화
@@ -274,6 +278,8 @@ function drawAddTaskModal() {
 export function drawVeiwTaskModal() {
   const container = document.createElement("div");
   container.id = "task-container";
+  container.classList.add("modal-box");
+  container.style.width = "500px";
 
   const closeButton = document.createElement("span");
   closeButton.id = "close-btn";
@@ -281,10 +287,26 @@ export function drawVeiwTaskModal() {
   closeButton.onclick = hideVeiwTaskModal;
   container.appendChild(closeButton);
 
+
+  const boxs =  document.createElement("div"); 
+  // boxs.classList.add("boxs");
+  boxs.style.display = "flex"; 
+  // boxs.style.alignItems = "stretch";
+  container.appendChild(boxs);
+  
+
+  const taskbox =  document.createElement("div"); 
+  taskbox.id = 'task-box';
+  // taskbox.classList.add("boxs-child");
+  taskbox.style.width = "280px";
+  taskbox.style.flexGrow = "1";
+  taskbox.style.marginRight = "5px";
+  boxs.appendChild(taskbox);
+  
   const columnHeader = document.createElement("div");
   columnHeader.classList.add("column-header");
   columnHeader.textContent = "TASK";
-  container.appendChild(columnHeader);
+  taskbox.appendChild(columnHeader);
 
   const createGroup = (label, id) => {
     const group = document.createElement("div");
@@ -301,7 +323,7 @@ export function drawVeiwTaskModal() {
     group.appendChild(labelElement);
     group.appendChild(labelContent);
 
-    container.appendChild(group);
+    taskbox.appendChild(group);
   };
 
   // 여기다!!!!
@@ -312,7 +334,113 @@ export function drawVeiwTaskModal() {
   createGroup("상태", "card-view-title");
   createGroup("내용", "card-view-content");
 
+
+  const commentbox =  document.createElement("div"); 
+  commentbox.id = 'comment-box';
+  // commentsbox.classList.add("boxs-child");
+  commentbox.style.width = "200px";
+  commentbox.style.flexGrow = "1";
+  commentbox.style.marginLeft = "5px";
+  boxs.appendChild(commentbox);
+  
+  const commenHeader = document.createElement("div");
+  commenHeader.classList.add("column-header");
+  commenHeader.textContent = "COMMENTS";
+  commentbox.appendChild(commenHeader);
+
+  const comments =  document.createElement("div");
+  comments.id = 'task-commnets';
+  comments.style.height = "465px";
+  comments.style.overflow = "auto"; 
+  // comments.style.border = "1px solid #ccc";
+  commentbox.appendChild(comments);
+  
+  const inputbox =  document.createElement("div"); 
+  inputbox.classList.add("form");
+  commentbox.appendChild(inputbox);
+  
+  const input = document.createElement("input");
+  input.classList.add("input");
+  input.type = "text";
+  input.id = "comment-input";
+  input.placeholder = "덧글쓰기";
+  inputbox.appendChild(input);
+  
+  const commentBtn = document.createElement("button");
+  commentBtn.id = "comment-btn";
+  commentBtn.textContent = "등록 하기";
+  inputbox.appendChild(commentBtn);
+  commentBtn.addEventListener('click',async ()=>{
+
+    const cardId = 0;// value.cardId
+    const comment = document.getElementById('comment-input').value;
+    await axios
+    .post(
+      `/comment/${cardId}`,
+      { comment },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    )
+    .then((response) => {
+      loadComments(cardId);
+    })
+    .catch((error) => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
+  })
+
+
   document.getElementById("modal-container").appendChild(container);
+}
+
+async function  loadComments(cardId) {
+  const comments = document.getElementById('task-comments');
+  comments.innerHTML =``;
+  
+  const createComment = (name, comment) => {
+    const group = document.createElement("div");
+    group.classList.add("group");
+
+    const labelElement = document.createElement("label");
+    labelElement.textContent = name;
+
+    const labelContent = document.createElement("div");
+    labelContent.classList.add("label");
+    // labelContent.id = id;
+    labelContent.innerText = comment;
+
+    group.appendChild(labelElement);
+    group.appendChild(labelContent);
+
+    comments.appendChild(group);
+  };
+
+  await axios
+  .get(
+    `/comment/ofCard/${cardId}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+  .then((response) => {
+    console.log()
+    loadComments(response.data);
+  })
+  .catch((error) => {
+    console.log('error: ', error);
+    alert(error.response.data.message);
+  });
+
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
+  // createComment("이름", "덧글");
 }
 
 // 새 태스크 카드를 생성하는 함수
