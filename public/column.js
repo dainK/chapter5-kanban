@@ -15,7 +15,8 @@ export async function createColumn(boardId, columnId, columnTitle) {
     )
     .then((response) => {
       console.log('response: ', response);
-      drawColumn(boardId, response.data.boardColum.id, columnTitle);
+      // drawColumn(boardId, columnId, columnTitle);
+      loadColumnList(boardId);
     })
     .catch((error) => {
       console.log('error: ', error);
@@ -37,7 +38,6 @@ export async function loadColumnList(boardId) {
       board.innerHTML = ``;
       const columns = response.data.columns;
       columns.forEach((column, index) => {
-        // drawColumn(column.id, column.title, column.boardMember[0].role); // role은 일단 킵
         drawColumn(boardId, column.id, column.title, index); // 칼럼 그리기
         column.card.forEach((e) => {
           createTaskCard(e.board_column_id, e.title, '아영', e.dead_line, e.priority, e.content, e.id); // 카드 그리기
@@ -75,7 +75,6 @@ export async function updateColumn(boardId, columnId, title, index) {
 
 // 칼럼 그리기
 export function drawColumn(boardId, columnId, columnTitle, index) {
-  console.log('columnId roQorcu: ', columnId);
   const board = document.getElementById('board');
 
   const column = document.createElement("div");

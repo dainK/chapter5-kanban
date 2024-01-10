@@ -39,7 +39,8 @@ function hideAddTaskModal() {
 }
 
 // 카드 편집 모달 비활성화
-export function showEditTaskModal() {
+export function showEditTaskModal(id) {
+  value.cardId = id;
   document.getElementById("modal-container").style.display = "flex";
 
   document.getElementById("add-task").style.display = "none";
@@ -200,12 +201,12 @@ function drawAddTaskModal() {
   submitBtn.textContent = "등록 하기";
 
   submitBtn.addEventListener("click", function () {
-    const columnId = document.getElementById(value.cardColumnId).id;
-    const title = document.getElementById("task-title").value;
-    const assignee = document.getElementById("task-assignee").value;
-    const dueDate = document.getElementById("task-due-date").value;
+    const columnId = value.cardColumnId;
+    const title = document.getElementById("task-title").value || "새 테스크";
+    const assignee = document.getElementById("task-assignee").value || "담당자없음"; // 만든 사람 이름 기본값으로 넣어주기
+    const dueDate = document.getElementById("task-due-date").value || getCurrentTimeFormatted(); // 오늘로 설정
     const priority = document.getElementById("task-priority").value;
-    const content = document.getElementById("task-content").value;
+    const content = document.getElementById("task-content").value || "내용없음";
 
     // 카드 저장 API
     const accessToken = localStorage.getItem('access_token');
@@ -223,7 +224,8 @@ function drawAddTaskModal() {
           assignee,
           dueDate,
           priority,
-          content
+          content,
+          response.data.id
         );
         hideAddTaskModal();
       })
@@ -240,7 +242,10 @@ function drawAddTaskModal() {
   editBtn.textContent = "수정 하기";
   editBtn.onclick = hideAddTaskModal;
 
+  // 수정 버튼을 눌렀을 때!!!
+  // 현재 카드의 번호를!!!! 가져와야한다!!!!!!!!!!!
   editBtn.addEventListener("click", function () {
+    const cardId = value.cardId;
     const title = document.getElementById("task-title").value;
     // const assignee = document.getElementById("task-assignee").value;
     const dueDate = document.getElementById("task-due-date").value;
@@ -248,13 +253,6 @@ function drawAddTaskModal() {
     const content = document.getElementById("task-content").value;
     const cards = document.querySelectorAll('.card');
     currentOrder = Array.from(cards).indexOf(currentColumnId);
-    // card 오류가 난다?!
-    // card.querySelector("strong").textContent = title;
-    // card.querySelector("assignee").textContent = assignee;
-    // card.querySelector(".due-date").textContent = dueDate;
-    // card.querySelector(".priority").textContent = priority;
-    // // card.closest(".column").id = document.getElementById("task-status").value;
-    // card.querySelector(".content").textContent = content;
 
     // 카드 정보 수정 API
     const accessToken = localStorage.getItem('access_token');
@@ -291,6 +289,17 @@ function drawAddTaskModal() {
 
   document.getElementById("modal-container").appendChild(submitContainer);
 }
+
+// 날짜 형식 변환
+function getCurrentTimeFormatted() {
+  const now = new Date();
+  const year = String(now.getFullYear());
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  return `${year}:${month}:${day}`;
+}
+
 
 // 카드 조회 모달 그리기
 export function drawVeiwTaskModal() {
@@ -396,7 +405,7 @@ export async function createTaskCard(
     currentColumnId = id; // 카드 수정할 때 사용할 ㅠㅠ 전역변수 ㅠㅠ
     const cards = document.querySelectorAll('.card');
     currentOrder = Array.from(cards).indexOf(card);
-    showEditTaskModal();
+    showEditTaskModal(id);
 
     const cardData = {
       title: card.querySelector("strong").textContent,
@@ -446,7 +455,7 @@ export async function createTaskCard(
       console.log('index: ', index);
       // 카드 정보 수정 API
       const accessToken = localStorage.getItem('access_token');
-      axios.patch(`/card/${column}`,
+      axios.patch(`/card/${id}`,
         { title, content, deadLine: dueDate, priority, index },
         {
           headers: { Authorization: `Bearer ${accessToken}` }

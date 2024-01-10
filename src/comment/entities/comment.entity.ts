@@ -1,6 +1,6 @@
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { Card } from 'src/card/entities/card.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Timestamp } from 'typeorm';
 
 @Entity('comments')
 export class Comment {
@@ -21,4 +21,7 @@ export class Comment {
 
   @Column({ type: 'text', nullable: false })
   comment: string;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  created_at: Timestamp;
 }

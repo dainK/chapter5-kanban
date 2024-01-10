@@ -44,7 +44,10 @@ export class BoardColumnService {
       .createQueryBuilder('boardColumn')
       .leftJoinAndSelect('boardColumn.card', 'card') // 'cards'는 BoardColumn 엔티티 내에 정의된 관계의 이름이어야 합니다.
       .where('boardColumn.board_id = :boardId', { boardId: board_id })
-      .orderBy('boardColumn.order', 'ASC')
+      .orderBy({
+        'boardColumn.order': 'ASC',
+        'card.order': 'ASC',
+      })
       .getMany();
     return { columns };
   }
@@ -65,7 +68,7 @@ export class BoardColumnService {
     const boardColumn = await this.findOne(id, board_id, user_id); // 칼럼 상세 조회
 
     // index 안받으면 newOrder 함수 안들어가게
-    if (updateBoardColumnDto.index !== null) {
+    if (updateBoardColumnDto.index >= 0) {
       const newOrder = await this.getNewOrder(board_id, updateBoardColumnDto.index);
       boardColumn.order = newOrder;
     }
