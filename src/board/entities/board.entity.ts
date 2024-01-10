@@ -17,7 +17,9 @@ export class Board {
   title: string;
 
   // 다대일 관계 설정(user)
-  @ManyToOne(() => User, (user) => user.board)
+  @ManyToOne(() => User, (user) => user.board, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User; // 관계 테이블
   @Column({ type: 'int', name: 'user_id' })
