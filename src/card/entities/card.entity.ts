@@ -1,6 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Level } from '../types/cardLevel.type';
 import { CardMember } from 'src/card-member/entities/card-member.entity';
+import { BoardColumn } from 'src/board-column/entities/board-column.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
 
 @Entity('cards')
 export class Card {
@@ -9,15 +11,17 @@ export class Card {
   id: number;
 
   // 해당 카드를 삽입할 컬럼의 id
+  @ManyToOne(() => BoardColumn, { eager: true }) // User 엔터티와의 관계 설정
+  @JoinColumn({ name: 'board_column_id' }) // 외부키로 사용할 열의 이름
+  board_column: BoardColumn;
   @Column({ type: 'int', nullable: false })
   board_column_id: number;
 
-  // task 담당자 id 배열
-  @Column({ type: 'int', nullable: false })
-  user_id: number;
+  // task 담당자 id
+  @OneToMany(() => CardMember, (card_member) => card_member.card_id, { onDelete: 'CASCADE' })
+  card_member: CardMember[];
 
-  // task 카드 생성, 수정 시 카드의 순서를 저장할 컬럼
-  // JIRA의 LexoRank를 이용해볼 예정이다.
+  // task 카드 생성, 수정 시 카드의 정렬 순서를 저장할 컬럼
   @Column({ type: 'varchar', nullable: false, unique: true })
   order: string;
 
@@ -37,6 +41,7 @@ export class Card {
   @Column({ type: 'enum', enum: Level, nullable: false })
   priority: Level;
 
-  @OneToMany(() => CardMember, (cardMember) => cardMember.card_id, { onDelete: 'CASCADE' })
-  cardMembers: CardMember[];
+  // 해당 카드에 달린 댓글
+  @OneToMany(() => Comment, (comment) => comment.card_id, { onDelete: 'CASCADE' })
+  comment: Comment[];
 }
