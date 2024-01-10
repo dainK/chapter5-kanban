@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Level } from '../types/cardLevel.type';
 import { CardMember } from 'src/card-member/entities/card-member.entity';
 import { BoardColumn } from 'src/board-column/entities/board-column.entity';
@@ -11,8 +11,8 @@ export class Card {
   id: number;
 
   // 해당 카드를 삽입할 컬럼의 id
-  @ManyToOne(() => BoardColumn, { eager: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' }) // User 엔터티와의 관계 설정
-  // @JoinColumn({ name: 'board_column_id' }) // 외부키로 사용할 열의 이름
+  @ManyToOne(() => BoardColumn, (board_column) => board_column.card, { eager: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' }) // User 엔터티와의 관계 설정
+  @JoinColumn({ name: 'board_column_id' }) // 외부키로 사용할 열의 이름
   board_column: BoardColumn;
   @Column({ type: 'int', nullable: false })
   board_column_id: number;

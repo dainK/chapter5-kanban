@@ -20,25 +20,31 @@ export class CardController {
     return this.cardService.findAll();
   }
 
-  @Get(':boardColumnId')
-  findAllByColumnId(@Param(':boardColumnId') boardColumnId: number) {
+  // 특정 보드 카드 조회
+  // @Get('board/:boardColumnId')
+  // findAllByBoardId(@Param('boardId') boardId: number) {
+  //   return this.cardService.findAllByBoardId(+boardId);
+  // }
+
+  @Get('boardColumn/:boardColumnId')
+  findAllByColumnId(@Param('boardColumnId') boardColumnId: number) {
     return this.cardService.findAllByColumnId(+boardColumnId);
   }
 
-  @Get('board_column_id/:id')
-  findOne(@Param('board_column_id') board_column_id: number, @Param('id') id: number) {
-    return this.cardService.findOne(+board_column_id, +id);
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.cardService.findOne(+id);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard) // 로그인 유저 인증
-  @Patch(':board_column_id/:id')
-  update(@Param('board_column_id') board_column_id: number, @Param('id') id: number, @Body() updateCardDto: UpdateCardDto) {
-    return this.cardService.update(+board_column_id, +id, updateCardDto);
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() updateCardDto: UpdateCardDto) {
+    return this.cardService.update(+id, updateCardDto);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard) // 로그인 유저 인증
-  @Delete(':board_column_id/:id')
-  remove(@Param('board_column_id') board_column_id: number, @Param('id') id: number) {
-    return this.cardService.remove(+board_column_id, +id);
+  @Delete(':id')
+  remove(@Param('id') id: number) {
+    return this.cardService.remove(+id);
   }
 }

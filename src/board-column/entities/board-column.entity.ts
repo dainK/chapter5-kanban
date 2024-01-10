@@ -22,10 +22,7 @@ export class BoardColumn {
 
   // 일대다 관계 설정(card)
   @OneToMany(() => Card, (card) => card.board_column, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'card_id' })
   card: Card[];
-  @Column({ type: 'int', name: 'card_id' })
-  card_id: number;
 
   // 보드 컬럼의 순서를 저장
   @Column({ type: 'varchar', nullable: false })

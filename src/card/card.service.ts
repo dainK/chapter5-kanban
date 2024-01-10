@@ -24,6 +24,7 @@ export class CardService {
     return await this.cardRepository.save({
       title: createCardDto.title,
       content: createCardDto.content,
+      board_column_id: boardColumnId,
       dead_line: createCardDto.deadLine,
       priority: createCardDto.priority,
       order: order,
@@ -45,25 +46,28 @@ export class CardService {
   }
 
   async findAllByColumnId(boardColumnId: number) {
-    const boardColumn = await this.boardColumnRepository.findOneBy({ id: boardColumnId });
+    console.log('boardColumn ?>>>>>>>>>>>>>>>', boardColumnId);
+
+    const boardColumn = await this.boardColumnRepository.findOne({ where: { id: boardColumnId } });
+
     if (!boardColumn) throw new NotFoundException('해당 컬럼이 존재하지 않습니다.');
 
-    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
+    const cards = await this.cardRepository.find({ where: { board_column_id: boardColumnId }, order: { order: 'ASC' } });
 
     return cards;
   }
 
-  async findOne(boardColumnId: number, id: number) {
-    await this.findAllByColumnId(boardColumnId);
+  async findOne(id: number) {
+    // await this.findAllByColumnId(boardColumnId);
 
     return await this.cardRepository.findOneBy({ id: id });
   }
 
-  async update(boardColumnId: number, id: number, updateCardDto: UpdateCardDto) {
-    await this.findAllByColumnId(boardColumnId);
-    const card = await this.findOne(boardColumnId, id);
+  async update(id: number, updateCardDto: UpdateCardDto) {
+    // await this.findAllByColumnId(boardColumnId);
+    const card = await this.findOne(id);
 
-    const newOrder = await this.getNewOrder(boardColumnId, updateCardDto.index);
+    const newOrder = await this.getNewOrder(card.board_column_id, updateCardDto.index);
     console.log('newOrder >> ', newOrder);
 
     card.order = newOrder;
@@ -72,7 +76,7 @@ export class CardService {
     return await this.cardRepository.save(card);
   }
 
-  async remove(boardColumnId: number, id: number) {
+  async remove(id: number) {
     return await this.cardRepository.delete({ id: id });
   }
 
@@ -82,14 +86,14 @@ export class CardService {
       const order = LexoRank.middle().toString();
       return order;
     }
-    const max = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'DESC').getOne();
+    const max = await this.cardRepository.findOne({ where: { board_column_id: boardColumnId }, order: { order: 'DESC' } });
 
     const order = LexoRank.parse(max.order).genNext().toString();
     return order;
   }
 
   async getNewOrder(boardColumnId: number, index: number) {
-    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
+    const cards = await this.cardRepository.find({ where: { board_column_id: boardColumnId }, order: { order: 'ASC' } });
 
     // cards의 0번째 order의 앞순서가 최소lexorank보다 작거나 cards의 마지막 order의 다음순서가 최대lexorank보다 크면 재정렬하기
     if (LexoRank.parse(cards[0].order).genPrev() >= LexoRank.min() || LexoRank.parse(cards[cards.length - 1].order).genNext() <= LexoRank.max()) this.reOrdering(boardColumnId);
@@ -115,7 +119,7 @@ export class CardService {
   }
 
   async reOrdering(boardColumnId: number) {
-    const cards = await this.cardRepository.createQueryBuilder('card').where('card.board_column_id', { board_column_id: boardColumnId }).orderBy('card.order', 'ASC').getMany();
+    const cards = await this.cardRepository.find({ where: { board_column_id: boardColumnId }, order: { order: 'ASC' } });
 
     let newLexoRank = LexoRank.middle();
     for (let i = 0; i < cards.length; i++) {
