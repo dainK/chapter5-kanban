@@ -42,6 +42,7 @@ export class JwtAuthGuard implements CanActivate {
         //   const payload = { email: user.email, sub: user.id };
         //   const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' }); // 얘를 REST CLIENT에 어케 적용시키냐..
         // }
+      return false;
       }
     }
     return true;

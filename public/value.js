@@ -4,6 +4,7 @@ export const value = {
   draggedcolumnItem : null,
   boardName : null,
   boardId : null,
+  socket: null,
 }
 
 // export let cardColumnId = null;

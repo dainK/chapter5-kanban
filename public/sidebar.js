@@ -1,4 +1,5 @@
 import { loadBoardList } from './board.js';
+import { socketLogin, socketLogout } from './socket.js';
 import { showLoginModal, showSignupModal, showProfileModal } from './user.js';
 
 // Sidebar 생성
@@ -17,7 +18,7 @@ export async function showSidebarState() {
       })
       .then((response) => {
         const user = response.data.user;
-        showSideStatelogin(user.name);
+        showSideStatelogin(user);
       })
       .catch((error) => {
         // console.log('error: ', error);
@@ -30,10 +31,11 @@ export async function showSidebarState() {
   }
 }
 
-async function showSideStatelogin(username) {
+async function showSideStatelogin(user) {
+  socketLogin(user);
   document.getElementById('main-container').style.display = 'none';
   const text = document.getElementById('sidebar-text');
-  text.innerText = `${username}님 안녕하세요.`;
+  text.innerText = `${user.name}님 안녕하세요.`;
   document.getElementById('login-button').style.display = 'none';
   document.getElementById('signup-button').style.display = 'none';
   document.getElementById('logout-button').style.display = 'block';
@@ -43,6 +45,7 @@ async function showSideStatelogin(username) {
 }
 
 function showSideStatelogout() {
+  socketLogout();
   document.getElementById('main-container').style.display = 'none';
   const text = document.getElementById('sidebar-text');
   text.innerText = `로그인이 필요합니다.`;
