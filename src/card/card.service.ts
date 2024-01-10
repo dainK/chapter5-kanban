@@ -69,7 +69,6 @@ export class CardService {
     card.order = newOrder;
 
     Object.assign(card, updateCardDto);
-
     return await this.cardRepository.save(card);
   }
 
@@ -123,5 +122,6 @@ export class CardService {
       cards[i].order = newLexoRank.toString();
       newLexoRank = newLexoRank.genNext();
     }
+    return await this.cardRepository.save(cards);
   }
 }

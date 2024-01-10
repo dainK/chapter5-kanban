@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Level } from '../types/cardLevel.type';
 import { CardMember } from 'src/card-member/entities/card-member.entity';
 import { BoardColumn } from 'src/board-column/entities/board-column.entity';
@@ -11,8 +11,8 @@ export class Card {
   id: number;
 
   // 해당 카드를 삽입할 컬럼의 id
-  @ManyToOne(() => BoardColumn, { eager: true }) // User 엔터티와의 관계 설정
-  @JoinColumn({ name: 'board_column_id' }) // 외부키로 사용할 열의 이름
+  @ManyToOne(() => BoardColumn, { eager: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' }) // User 엔터티와의 관계 설정
+  // @JoinColumn({ name: 'board_column_id' }) // 외부키로 사용할 열의 이름
   board_column: BoardColumn;
   @Column({ type: 'int', nullable: false })
   board_column_id: number;
@@ -22,7 +22,7 @@ export class Card {
   card_member: CardMember[];
 
   // task 카드 생성, 수정 시 카드의 정렬 순서를 저장할 컬럼
-  @Column({ type: 'varchar', nullable: false, unique: true })
+  @Column({ type: 'varchar', nullable: false })
   order: string;
 
   // task 카드 제목
