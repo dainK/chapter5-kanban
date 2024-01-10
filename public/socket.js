@@ -28,7 +28,7 @@ export function socketLogout() {
   
 }
 
-export function initailizeNotifcation() {
+export function initailizeNotification() {
   createNotificationModal();
   hideNotificationModal();
 }

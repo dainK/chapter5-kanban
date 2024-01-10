@@ -7,6 +7,7 @@ import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { Board } from 'src/board/entities/board.entity';
 import { User } from 'src/user/entities/user.entity';
 import { EventsGateway } from 'src/events/events.gateway';
+import { EventType } from 'src/events/events.type';
 
 @Injectable()
 export class BoardMemberService {
@@ -21,7 +22,7 @@ export class BoardMemberService {
   ) {}
 
   async create(board_id: number, user_id: number, select_user_id: number, role: number) {
-    await this.findOneBoard(board_id); // 보드 정보 조회
+    const board = await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
 
     const existingBoardMember = await this.findBoardMember(board_id, select_user_id); // 보드 멤버 조회
@@ -36,7 +37,7 @@ export class BoardMemberService {
       role,
     });
 
-    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(),message:"보드멤버로 초대 되었습니다."});
+    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(), message: `"${board.title}" 보드멤버에 추가 되었습니다.`});
     return { message: '보드 멤버 추가가 완료되었습니다.' };
   }
 
@@ -101,7 +102,7 @@ export class BoardMemberService {
   }
 
   async remove(board_id: number, user_id: number, select_user_id: number) {
-    await this.findOneBoard(board_id); // 보드 정보 조회
+    const board = await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
 
     const boardMember = await this.findBoardMember(board_id, select_user_id); // 보드 멤버 조회
@@ -115,7 +116,7 @@ export class BoardMemberService {
 
     // 보드 멤버 삭제
     await this.boardMemberRepository.delete({ board_id, user_id: select_user_id });
-    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(),message:"보드멤버에서 제외 되었습니다."})
+    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(),message:`"${board.title}" 보드멤버에서 제외 되었습니다.`});
     return { message: '보드 멤버 삭제가 완료되었습니다.' };
   }
 
