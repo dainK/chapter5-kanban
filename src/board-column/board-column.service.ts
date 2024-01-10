@@ -44,7 +44,10 @@ export class BoardColumnService {
       .createQueryBuilder('boardColumn')
       .leftJoinAndSelect('boardColumn.card', 'card') // 'cards'는 BoardColumn 엔티티 내에 정의된 관계의 이름이어야 합니다.
       .where('boardColumn.board_id = :boardId', { boardId: board_id })
-      .orderBy('boardColumn.order', 'ASC')
+      .orderBy({
+        'boardColumn.order': 'ASC',
+        'card.order': 'ASC',
+      })
       .getMany();
     return { columns };
   }
