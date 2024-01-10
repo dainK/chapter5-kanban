@@ -16,11 +16,18 @@ value.socket.on('privateResponse', function (res) {
   
 });
 
+value.socket.on('roomMessage', function (res) {
+  console.log('roomMessage', res);
+  
+});
+
 export function socketLogin(user) {
   // value.socket.emit('login',  "1");
-  value.socket.emit('login', user.id, response =>
+  value.socket.emit('login', user.id.toString(), response =>
     console.log('login:', response),
   );
+  
+  // value.socket.emit('joinRoom', user.id.toString());
 
   // value.socket.emit('privateMessage', { userId: user.id, message : "hit" });
 }

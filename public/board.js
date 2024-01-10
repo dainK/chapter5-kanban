@@ -270,7 +270,8 @@ async function drawBoard(boardId, title, role) {
   // 사용자가 보드 Admin인 경우
   if (role === 0) clickableDiv.appendChild(trashButton);
 
-  trashButton.addEventListener('click', function () {
+  trashButton.addEventListener('click', function (e) {
+    e.stopPropagation(); 
     if (confirm('보드를 삭제하시겠습니까?')) {
       // 사용자가 '확인'을 클릭한 경우
       // 보드 정보 삭제 API
@@ -283,13 +284,12 @@ async function drawBoard(boardId, title, role) {
         .then(response => {
           console.log('response: ', response);
           alert("삭제가 완료되었습니다.");
-          location.reload();
+          loadBoardList();
         })
         .catch(error => {
           console.log('error: ', error);
           alert(error.response.data.message);
         });
-      // loadBoardList();
     }
   });
 

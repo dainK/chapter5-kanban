@@ -8,7 +8,7 @@ import { BoardService } from './board.service';
 import { BoardController } from './board.controller';
 import { Board } from './entities/board.entity';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
-import { EventsModule } from 'src/events/events.module';
+
 
 @Module({
   imports: [
@@ -20,8 +20,7 @@ import { EventsModule } from 'src/events/events.module';
     }),
     RedisModule,
     TypeOrmModule.forFeature([Board]),
-    TypeOrmModule.forFeature([BoardMember]),
-    EventsModule
+    TypeOrmModule.forFeature([BoardMember])
   ],
   controllers: [BoardController],
   providers: [BoardService],

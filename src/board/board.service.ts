@@ -15,7 +15,6 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
-    private readonly eventsGateway: EventsGateway,
   ) {}
 
   async create(user_id: number) {
@@ -32,7 +31,7 @@ export class BoardService {
       role: 0,
     });
 
-    this.eventsGateway.handlePrivateMessage({userId:user_id.toString(),message:"추가"})
+    
     return { message: '보드 저장이 완료되었습니다.', board: { id: boardDetail.id, title: '새 보드' } };
   }
 
