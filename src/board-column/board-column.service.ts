@@ -65,7 +65,7 @@ export class BoardColumnService {
     const boardColumn = await this.findOne(id, board_id, user_id); // 칼럼 상세 조회
 
     // index 안받으면 newOrder 함수 안들어가게
-    if (updateBoardColumnDto.index !== null) {
+    if (updateBoardColumnDto.index >= 0) {
       const newOrder = await this.getNewOrder(board_id, updateBoardColumnDto.index);
       boardColumn.order = newOrder;
     }

@@ -11,21 +11,27 @@ export class CommentController {
 
   // 댓글 생성
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
-  @Post()
-  create(@Body() createCommentDto: CreateCommentDto, @Req() req) {
-    return this.commentService.create(createCommentDto, +req.user.id);
+  @Post(':cardId')
+  create(@Body() createCommentDto: CreateCommentDto, @Param('cardId') cardId: number, @Req() req) {
+    return this.commentService.create(createCommentDto.comment, +cardId, +req.user.id);
   }
 
   // 해당 카드의 댓글 전체 조회
-  @Get(':cardId')
+  @Get('ofCard/:cardId')
   findCommentByCardId(@Param('cardId') cardId: number) {
-    return this.commentService.findCardById(cardId);
+    return this.commentService.findCommentByCardId(+cardId);
+  }
+
+  // 해당 카드의 댓글 상세 조회
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.commentService.findOne(+id);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto, @Req() req) {
-    return this.commentService.update(+id, updateCommentDto, +req.user.id);
+    return this.commentService.update(+id, updateCommentDto.comment, +req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
