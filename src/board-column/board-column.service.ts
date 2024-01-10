@@ -22,14 +22,13 @@ export class BoardColumnService {
   async create(createBoardColumnDto: CreateBoardColumnDto, board_id: number, user_id: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
-    await this.findOneByTitle(createBoardColumnDto.title); // 제목 중복 여부 체크
     const order = await this.getOrder(board_id); // 칼럼 생성 시 정렬 순서 저장
 
     // 칼럼 정보 저장
     const boardColum = await this.boardColumnRepository.save({
       board_id,
       title: createBoardColumnDto.title,
-      order: order,
+      order,
     });
 
     return { message: '칼럼 저장이 완료되었습니다.', boardColum };
@@ -45,12 +44,7 @@ export class BoardColumnService {
 
     const columns = await this.boardColumnRepository.find({ where: { board_id }, order: { order: 'ASC' } });
 
-    // ERR : 칼럼이 없는 경우
-    if (!columns) {
-      throw new NotFoundException('칼럼이 존재하지 않습니다.');
-    }
-
-    return columns;
+    return { columns };
   }
 
   // 칼럼 상세 조회
@@ -59,17 +53,13 @@ export class BoardColumnService {
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
     await this.findOneColumn(id); // 칼럼 상세 조회
 
-    return await this.boardColumnRepository.findOneBy({ id: id });
+    return await this.boardColumnRepository.findOneBy({ id });
   }
 
   async update(id: number, updateBoardColumnDto: UpdateBoardColumnDto, board_id: number, user_id: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
-    // 수정내역에 제목이 있다면 제목 중복 여부 체크
-    if (updateBoardColumnDto.title) {
-      await this.findOneByTitle(updateBoardColumnDto.title);
-    }
     const boardColumn = await this.findOne(id, board_id, user_id); // 칼럼 상세 조회
 
     // index 안받으면 newOrder 함수 안들어가게

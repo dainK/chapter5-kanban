@@ -193,6 +193,8 @@ function createLoginModal() {
   loginButton.addEventListener("click", () => {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
+
+    // 로그인 API 
     axios.post('/user/login', { email, password })
       .then(response => {
         console.log(response.data);
@@ -205,7 +207,7 @@ function createLoginModal() {
       })
       .catch(error => {
         console.error(error);
-        // 에러 처리
+        alert(error.response.data.message);
       });
   });
 }
