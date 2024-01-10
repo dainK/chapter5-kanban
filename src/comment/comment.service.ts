@@ -60,6 +60,7 @@ export class CommentService {
 
   async update(id: number, updatedComment: string, userId: number) {
     const comment = await this.findOne(id);
+    if (!comment) throw new NotFoundException('해당하는 댓글이 존재하지 않습니다.');
     if (userId !== comment.board_member_id) throw new UnauthorizedException('작성자만 수정할 수 있습니다.');
 
     await this.commentRepository.update({ id: id }, { comment: updatedComment });
@@ -68,7 +69,8 @@ export class CommentService {
 
   async remove(id: number, userId: number) {
     const comment = await this.findOne(id);
-    if (userId !== comment.board_member_id) throw new UnauthorizedException('작성자만 수정할 수 있습니다.');
+    if (!comment) throw new NotFoundException('해당하는 댓글이 존재하지 않습니다.');
+    if (userId !== comment.board_member_id) throw new UnauthorizedException('작성자만 삭제할 수 있습니다.');
 
     await this.commentRepository.delete(id);
     return { message: '댓글 삭제가 완료되었습니다.' };

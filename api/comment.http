@@ -9,7 +9,7 @@ POST {{domain}}/user/login
 Content-Type: application/json
 
 {
-	"email":"test1@gmail.com",
+	"email":"admin@gmail.com",
 	"password":"test_pw"
 }
 
@@ -43,16 +43,16 @@ Content-Type: application/json
 
 ###
 # 댓글 수정 @Param(id)
-PATCH {{domain}}/comment/1
+PATCH {{domain}}/comment/7
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "comment": "gkdlfn"
+    "comment": "gkdlgklfn"
 }
 
 ###
 # 댓글 삭제 @Param(id)
-DELETE {{domain}}/comment/6
+DELETE {{domain}}/comment/7
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
