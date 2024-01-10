@@ -286,7 +286,7 @@ export function drawVeiwTaskModal() {
   columnHeader.textContent = "TASK";
   container.appendChild(columnHeader);
 
-  const createGroup = (label) => {
+  const createGroup = (label, id) => {
     const group = document.createElement("div");
     group.classList.add("group");
 
@@ -295,6 +295,8 @@ export function drawVeiwTaskModal() {
 
     const labelContent = document.createElement("div");
     labelContent.classList.add("label");
+    labelContent.id = id;
+    labelContent.innerText = label;
 
     group.appendChild(labelElement);
     group.appendChild(labelContent);
@@ -302,15 +304,17 @@ export function drawVeiwTaskModal() {
     container.appendChild(group);
   };
 
-  createGroup("제목");
-  createGroup("당담자");
-  createGroup("완료일");
-  createGroup("우선순위");
-  createGroup("상태");
-  createGroup("내용");
+  // 여기다!!!!
+  createGroup("제목", "card-view-title");
+  createGroup("당담자", "card-view-assignee");
+  createGroup("완료일", "card-view-dueDate");
+  createGroup("우선순위", "card-view-priority");
+  createGroup("상태", "card-view-title");
+  createGroup("내용", "card-view-content");
 
   document.getElementById("modal-container").appendChild(container);
 }
+
 // 새 태스크 카드를 생성하는 함수
 export async function createTaskCard(
   column,
@@ -423,6 +427,13 @@ export async function createTaskCard(
       !e.target.classList.contains("delete-btn")
     ) {
       showVeiwTaskModal();
+      // 카드 조회 모달 값 갱신
+      document.getElementById("card-view-title").innerText = title;
+      document.getElementById("card-view-assignee").innerText = assignee;
+      document.getElementById("card-view-dueDate").innerText = dueDate;
+      document.getElementById("card-view-priority").innerText = priority;
+      // document.getElementById("card-view-status").innerText = status;
+      document.getElementById("card-view-content").innerText = content;
     }
   });
 
