@@ -1,10 +1,13 @@
 export function initializeModals() {
   createLoginModal();
-  createSignupModal();
-  createProfileModal();
   hideLoginModal();
+
+  createSignupModal();
   hideSignupModal();
+
+  createProfileModal();
   hideProfileModal();
+  
 }
 
 // 로그인 모달 활성화
@@ -154,7 +157,7 @@ function createLoginModal() {
   // 모달 컨테이너 생성
   const modalContainer = document.createElement("div");
   modalContainer.id = "login-container";
-  modalContainer.classList.add("modal-container");
+  modalContainer.classList.add("modal-box");
   document.getElementById("modal-container").appendChild(modalContainer);
 
   // 닫기 버튼 생성
@@ -215,6 +218,7 @@ function createLoginModal() {
 function createSignupModal() {
   const signupContainer = document.createElement("div");
   signupContainer.id = "signup-container";
+  signupContainer.classList.add("modal-box");
 
   // close-btn 생성
   const closeBtn = document.createElement("span");
@@ -300,6 +304,7 @@ function createSignupModal() {
 async function createProfileModal() {
   const profileContainer = document.createElement("div");
   profileContainer.id = "profile-container";
+  profileContainer.classList.add("modal-box");
   document.getElementById("modal-container").appendChild(profileContainer);
 
   // close-btn 생성
@@ -360,3 +365,4 @@ async function createProfileModal() {
       });
   });
 }
+
