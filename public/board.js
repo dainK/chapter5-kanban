@@ -1,4 +1,4 @@
-import { createColumn } from './column.js';
+import { createColumn, loadColumnList } from './column.js';
 import { value } from './value.js';
 
 export function initializeBoard() {
@@ -98,7 +98,7 @@ function initailizeBoardBody() {
   addColumnButton.addEventListener('click', function () {
     const boardContainer = document.getElementById('board');
     const columns = boardContainer.querySelectorAll('.column');
-    createColumn(columns.length, columns.length);
+    createColumn(currentBoardId, columns.length, '새 칼럼');
   });
   main.appendChild(addColumnButton);
 
@@ -185,24 +185,17 @@ export async function loadBoardList() {
 }
 
 async function createBoard() {
-  const accessToken = await localStorage.getItem('access_token');
   // 보드 정보 저장 API
+  const accessToken = await localStorage.getItem('access_token');
   await axios
-    .post(
-      '/board',
+    .post('/board',
       {},
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       },
     )
     .then((response) => {
-      const board = response.data.board;
-      const boardId = board.id;
-      const title = board.title;
-      const role = board.boardMember[0].role;
-
-      drawBoard(boardId, title, role); // 새로 생성된 보드 그리기
-      drawPlusBoard('create'); // 보드 추가 버튼 그리기
+      loadBoardList(); // 보드 목록 조회
     })
     .catch((error) => {
       console.log('error: ', error);
@@ -232,8 +225,8 @@ async function drawPlusBoard(status) {
 }
 
 async function updateBoard(boardId, title) {
-  const accessToken = await localStorage.getItem('access_token');
   // 보드 정보 보기 api
+  const accessToken = await localStorage.getItem('access_token');
   await axios
     .patch(
       `/board/${boardId}`,
@@ -264,6 +257,7 @@ async function drawBoard(boardId, title, role) {
   // 클릭 이벤트 리스너 추가
   clickableDiv.addEventListener('click', function (e) {
     loadboard(boardId, role);
+    loadColumnList(boardId);
     currentBoardId = boardId;
     currentBoardMemberRole = role;
   });
