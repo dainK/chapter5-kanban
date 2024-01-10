@@ -163,7 +163,6 @@ export async function loadboard(boardId, role) {
 export async function loadBoardList() {
   const boardList = document.getElementById('board-list');
   const accessToken = await localStorage.getItem('access_token');
-  boardList.innerHTML = ``;
 
   // 보드 목록 조회 API
   await axios
@@ -171,6 +170,7 @@ export async function loadBoardList() {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     .then((response) => {
+      boardList.innerHTML = ``;
       const boards = response.data.boards;
       boards.forEach((element) => {
         drawBoard(element.id, element.title, element.boardMember[0].role);
