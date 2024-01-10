@@ -39,7 +39,8 @@ function hideAddTaskModal() {
 }
 
 // 카드 편집 모달 비활성화
-function showEditTaskModal() {
+export function showEditTaskModal(id) {
+  value.cardId = id;
   document.getElementById("modal-container").style.display = "flex";
 
   document.getElementById("add-task").style.display = "none";
@@ -51,12 +52,14 @@ function showEditTaskModal() {
 }
 
 // 카드 조회 모달 활성화
-function showVeiwTaskModal() {
+function showVeiwTaskModal(id) {
+  value.cardId = id;
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("task-container").style.display = "block";
 
   const taskbox = document.getElementById("task-box");
   const commentsbox = document.getElementById("comment-box");
+  loadComments(id);
   // commentsbox.offsetHeight= taskbox.offsetHeight;
 }
 
@@ -86,6 +89,9 @@ function createFormGroup(labelText, inputId, inputType, placeholder) {
 
   return group;
 }
+
+let currentColumnId;
+let currentOrder;
 
 // 카드 추가 모달 그리기
 function drawAddTaskModal() {
@@ -201,12 +207,12 @@ function drawAddTaskModal() {
   submitBtn.textContent = "등록 하기";
 
   submitBtn.addEventListener("click", function () {
-    const columnId = document.getElementById(value.cardColumnId).id;
-    const title = document.getElementById("task-title").value;
-    const assignee = document.getElementById("task-assignee").value;
-    const dueDate = document.getElementById("task-due-date").value;
+    const columnId = value.cardColumnId;
+    const title = document.getElementById("task-title").value || "새 테스크";
+    const assignee = document.getElementById("task-assignee").value || "담당자없음"; // 만든 사람 이름 기본값으로 넣어주기
+    const dueDate = document.getElementById("task-due-date").value || getCurrentTimeFormatted(); // 오늘로 설정
     const priority = document.getElementById("task-priority").value;
-    const content = document.getElementById("task-content").value;
+    const content = document.getElementById("task-content").value || "내용없음";
 
     // 카드 저장 API
     const accessToken = localStorage.getItem('access_token');
@@ -224,7 +230,8 @@ function drawAddTaskModal() {
           assignee,
           dueDate,
           priority,
-          content
+          content,
+          response.data.id
         );
         hideAddTaskModal();
       })
@@ -241,19 +248,34 @@ function drawAddTaskModal() {
   editBtn.textContent = "수정 하기";
   editBtn.onclick = hideAddTaskModal;
 
+  // 수정 버튼을 눌렀을 때!!!
+  // 현재 카드의 번호를!!!! 가져와야한다!!!!!!!!!!!
   editBtn.addEventListener("click", function () {
-    card.querySelector("strong").textContent =
-      document.getElementById("task-title").value;
-    card.querySelector("assignee").textContent =
-      document.getElementById("task-assignee").value;
-    card.querySelector(".due-date").textContent =
-      document.getElementById("task-due-date").value;
-    card.querySelector(".priority").textContent =
-      document.getElementById("task-priority").value;
-    // card.closest(".column").id =
-    // document.getElementById("task-status").value;
-    card.querySelector(".content").textContent =
-      document.getElementById("task-content").value;
+    const cardId = value.cardId;
+    const title = document.getElementById("task-title").value;
+    // const assignee = document.getElementById("task-assignee").value;
+    const dueDate = document.getElementById("task-due-date").value;
+    const priority = document.getElementById("task-priority").value;
+    const content = document.getElementById("task-content").value;
+    const cards = document.querySelectorAll('.card');
+    currentOrder = Array.from(cards).indexOf(currentColumnId);
+
+    // 카드 정보 수정 API
+    const accessToken = localStorage.getItem('access_token');
+    axios.patch(`/card/${currentColumnId}`,
+      { title, content, deadLine: dueDate, priority, index: currentOrder },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      }
+    )
+      .then(response => {
+        console.log('response: ', response);
+        alert("수정이 완료되었습니다.");
+      })
+      .catch(error => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
   });
 
   // 자식 요소들을 추가
@@ -273,6 +295,17 @@ function drawAddTaskModal() {
 
   document.getElementById("modal-container").appendChild(submitContainer);
 }
+
+// 날짜 형식 변환
+function getCurrentTimeFormatted() {
+  const now = new Date();
+  const year = String(now.getFullYear());
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  return `${year}:${month}:${day}`;
+}
+
 
 // 카드 조회 모달 그리기
 export function drawVeiwTaskModal() {
@@ -349,7 +382,7 @@ export function drawVeiwTaskModal() {
   commentbox.appendChild(commenHeader);
 
   const comments =  document.createElement("div");
-  comments.id = 'task-commnets';
+  comments.id = 'task-comments';
   comments.style.height = "465px";
   comments.style.overflow = "auto"; 
   // comments.style.border = "1px solid #ccc";
@@ -372,8 +405,9 @@ export function drawVeiwTaskModal() {
   inputbox.appendChild(commentBtn);
   commentBtn.addEventListener('click',async ()=>{
 
-    const cardId = 0;// value.cardId
+    const cardId = value.cardId;
     const comment = document.getElementById('comment-input').value;
+    const accessToken = await localStorage.getItem('access_token');
     await axios
     .post(
       `/comment/${cardId}`,
@@ -396,6 +430,8 @@ export function drawVeiwTaskModal() {
 }
 
 async function  loadComments(cardId) {
+  document.getElementById('comment-input').value = '';
+
   const comments = document.getElementById('task-comments');
   comments.innerHTML =``;
   
@@ -417,6 +453,7 @@ async function  loadComments(cardId) {
     comments.appendChild(group);
   };
 
+  const accessToken = await localStorage.getItem('access_token');
   await axios
   .get(
     `/comment/ofCard/${cardId}`,
@@ -425,23 +462,19 @@ async function  loadComments(cardId) {
     },
   )
   .then((response) => {
-    console.log()
-    loadComments(response.data);
+    console.log(response.data);
+    // loadComments(response.data);
+    response.data.forEach((e)=>{
+      createComment(e.board_member_id, e.comment);
+    })
   })
   .catch((error) => {
     console.log('error: ', error);
     alert(error.response.data.message);
   });
 
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
-  // createComment("이름", "덧글");
 }
+
 
 // 새 태스크 카드를 생성하는 함수
 export async function createTaskCard(
@@ -450,11 +483,13 @@ export async function createTaskCard(
   assignee,
   dueDate,
   priority,
-  content
+  content,
+  id,
 ) {
   const currentColumn = document.getElementById(column);
 
   const card = document.createElement("div");
+  card.id = `card-${id}`;
   card.classList.add("card");
   card.draggable = true;
 
@@ -496,8 +531,10 @@ export async function createTaskCard(
   buttonbox.appendChild(editButton);
 
   editButton.addEventListener("click", function () {
-
-    showEditTaskModal();
+    currentColumnId = id; // 카드 수정할 때 사용할 ㅠㅠ 전역변수 ㅠㅠ
+    const cards = document.querySelectorAll('.card');
+    currentOrder = Array.from(cards).indexOf(card);
+    showEditTaskModal(id);
 
     const cardData = {
       title: card.querySelector("strong").textContent,
@@ -509,8 +546,6 @@ export async function createTaskCard(
     };
 
     // 여기서 cardData를 활용하여 원하는 작업 수행
-    console.log(cardData);
-
     document.getElementById("task-title").value = cardData.title;
     document.getElementById("task-assignee").value = cardData.assignee;
     cardData.dueDate !== "날짜없음";
@@ -541,8 +576,28 @@ export async function createTaskCard(
     setTimeout(() => (card.style.display = "none"), 0);
   });
 
+  // 카드 이동 완료
   card.addEventListener("dragend", function () {
     setTimeout(() => {
+      const cards = document.querySelectorAll('.card');
+      const index = Array.from(cards).indexOf(card);
+      console.log('index: ', index);
+      // 카드 정보 수정 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.patch(`/card/${id}`,
+        { title, content, deadLine: dueDate, priority, index },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+
       card.style.display = "block";
       card.classList.remove("dragging");
       value.draggedcardItem = null;
@@ -554,7 +609,7 @@ export async function createTaskCard(
       !e.target.classList.contains("edit-btn") &&
       !e.target.classList.contains("delete-btn")
     ) {
-      showVeiwTaskModal();
+      showVeiwTaskModal(id);
       // 카드 조회 모달 값 갱신
       document.getElementById("card-view-title").innerText = title;
       document.getElementById("card-view-assignee").innerText = assignee;
@@ -569,4 +624,4 @@ export async function createTaskCard(
   moveAddCardButton(currentColumn);
 
   // return card;
-}
+};

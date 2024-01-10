@@ -39,6 +39,7 @@ export class CardController {
   @UseGuards(AuthGuard('jwt'), JwtAuthGuard) // 로그인 유저 인증
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateCardDto: UpdateCardDto) {
+    console.log('updateCardDto: ', updateCardDto);
     return this.cardService.update(+id, updateCardDto);
   }
 
