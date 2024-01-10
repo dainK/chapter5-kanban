@@ -39,7 +39,7 @@ function hideAddTaskModal() {
 }
 
 // 카드 편집 모달 비활성화
-function showEditTaskModal() {
+export function showEditTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
 
   document.getElementById("add-task").style.display = "none";
@@ -82,6 +82,9 @@ function createFormGroup(labelText, inputId, inputType, placeholder) {
 
   return group;
 }
+
+let currentColumnId;
+let currentOrder;
 
 // 카드 추가 모달 그리기
 function drawAddTaskModal() {
@@ -238,18 +241,37 @@ function drawAddTaskModal() {
   editBtn.onclick = hideAddTaskModal;
 
   editBtn.addEventListener("click", function () {
-    card.querySelector("strong").textContent =
-      document.getElementById("task-title").value;
-    card.querySelector("assignee").textContent =
-      document.getElementById("task-assignee").value;
-    card.querySelector(".due-date").textContent =
-      document.getElementById("task-due-date").value;
-    card.querySelector(".priority").textContent =
-      document.getElementById("task-priority").value;
-    // card.closest(".column").id =
-    // document.getElementById("task-status").value;
-    card.querySelector(".content").textContent =
-      document.getElementById("task-content").value;
+    const title = document.getElementById("task-title").value;
+    // const assignee = document.getElementById("task-assignee").value;
+    const dueDate = document.getElementById("task-due-date").value;
+    const priority = document.getElementById("task-priority").value;
+    const content = document.getElementById("task-content").value;
+    const cards = document.querySelectorAll('.card');
+    currentOrder = Array.from(cards).indexOf(currentColumnId);
+    // card 오류가 난다?!
+    // card.querySelector("strong").textContent = title;
+    // card.querySelector("assignee").textContent = assignee;
+    // card.querySelector(".due-date").textContent = dueDate;
+    // card.querySelector(".priority").textContent = priority;
+    // // card.closest(".column").id = document.getElementById("task-status").value;
+    // card.querySelector(".content").textContent = content;
+
+    // 카드 정보 수정 API
+    const accessToken = localStorage.getItem('access_token');
+    axios.patch(`/card/${currentColumnId}`,
+      { title, content, deadLine: dueDate, priority, index: currentOrder },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      }
+    )
+      .then(response => {
+        console.log('response: ', response);
+        alert("수정이 완료되었습니다.");
+      })
+      .catch(error => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
   });
 
   // 자식 요소들을 추가
@@ -315,6 +337,7 @@ export function drawVeiwTaskModal() {
   document.getElementById("modal-container").appendChild(container);
 }
 
+
 // 새 태스크 카드를 생성하는 함수
 export async function createTaskCard(
   column,
@@ -322,11 +345,13 @@ export async function createTaskCard(
   assignee,
   dueDate,
   priority,
-  content
+  content,
+  id,
 ) {
   const currentColumn = document.getElementById(column);
 
   const card = document.createElement("div");
+  card.id = `card-${id}`;
   card.classList.add("card");
   card.draggable = true;
 
@@ -368,7 +393,9 @@ export async function createTaskCard(
   buttonbox.appendChild(editButton);
 
   editButton.addEventListener("click", function () {
-
+    currentColumnId = id; // 카드 수정할 때 사용할 ㅠㅠ 전역변수 ㅠㅠ
+    const cards = document.querySelectorAll('.card');
+    currentOrder = Array.from(cards).indexOf(card);
     showEditTaskModal();
 
     const cardData = {
@@ -381,8 +408,6 @@ export async function createTaskCard(
     };
 
     // 여기서 cardData를 활용하여 원하는 작업 수행
-    console.log(cardData);
-
     document.getElementById("task-title").value = cardData.title;
     document.getElementById("task-assignee").value = cardData.assignee;
     cardData.dueDate !== "날짜없음";
@@ -413,8 +438,28 @@ export async function createTaskCard(
     setTimeout(() => (card.style.display = "none"), 0);
   });
 
+  // 카드 이동 완료
   card.addEventListener("dragend", function () {
     setTimeout(() => {
+      const cards = document.querySelectorAll('.card');
+      const index = Array.from(cards).indexOf(card);
+      console.log('index: ', index);
+      // 카드 정보 수정 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.patch(`/card/${column}`,
+        { title, content, deadLine: dueDate, priority, index },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+
       card.style.display = "block";
       card.classList.remove("dragging");
       value.draggedcardItem = null;
@@ -441,4 +486,4 @@ export async function createTaskCard(
   moveAddCardButton(currentColumn);
 
   // return card;
-}
+};
