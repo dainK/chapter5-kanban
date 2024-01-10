@@ -2,12 +2,12 @@ import { Injectable, ConflictException, NotFoundException, UnauthorizedException
 import { CreateBoardColumnDto } from './dto/create-board-column.dto';
 import { UpdateBoardColumnDto } from './dto/update-board-column.dto';
 
-import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardColumn } from 'src/board-column/entities/board-column.entity';
 import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
+import { LexoRank } from 'lexorank';
 
 @Injectable()
 export class BoardColumnService {
@@ -23,11 +23,13 @@ export class BoardColumnService {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
     await this.findOneByTitle(createBoardColumnDto.title); // 제목 중복 여부 체크
+    const order = await this.getOrder(board_id); // 칼럼 생성 시 정렬 순서 저장
 
     // 칼럼 정보 저장
     const boardColum = await this.boardColumnRepository.save({
       board_id,
       title: createBoardColumnDto.title,
+      order: order,
     });
 
     return { message: '칼럼 저장이 완료되었습니다.', boardColum };
@@ -39,35 +41,46 @@ export class BoardColumnService {
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
 
     // 칼럼 목록 조회
-    const columns = await this.boardColumnRepository.find({ where: { board_id } });
+    // const columns = await this.boardColumnRepository.createQueryBuilder('board_column').where('board_column.board_id', { board_id: board_id }).orderBy('board_column.order', 'ASC').getMany();
+
+    const columns = await this.boardColumnRepository.find({ where: { board_id }, order: { order: 'ASC' } });
 
     // ERR : 칼럼이 없는 경우
     if (!columns) {
       throw new NotFoundException('칼럼이 존재하지 않습니다.');
     }
 
-    return { columns };
+    return columns;
   }
 
   // 칼럼 상세 조회
   async findOne(id: number, board_id: number, user_id: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
-    const column = await this.findOneColumn(id); // 칼럼 상세 조회
+    await this.findOneColumn(id); // 칼럼 상세 조회
 
-    return { column };
+    return await this.boardColumnRepository.findOneBy({ id: id });
   }
 
   async update(id: number, updateBoardColumnDto: UpdateBoardColumnDto, board_id: number, user_id: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
-    await this.findOneColumn(id); // 칼럼 상세 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
-    await this.findOneByTitle(updateBoardColumnDto.title); // 제목 중복 여부 체크
+    // 수정내역에 제목이 있다면 제목 중복 여부 체크
+    if (updateBoardColumnDto.title) {
+      await this.findOneByTitle(updateBoardColumnDto.title);
+    }
+    const boardColumn = await this.findOne(id, board_id, user_id); // 칼럼 상세 조회
+
+    // index 안받으면 newOrder 함수 안들어가게
+    if (updateBoardColumnDto.index !== null) {
+      const newOrder = await this.getNewOrder(board_id, updateBoardColumnDto.index);
+      boardColumn.order = newOrder;
+    }
 
     // 칼럼 업데이트
-    await this.boardColumnRepository.update({ id }, { title: updateBoardColumnDto.title });
-    return { column: { title: updateBoardColumnDto.title } };
+    Object.assign(boardColumn, updateBoardColumnDto);
+    return await this.boardColumnRepository.save(boardColumn);
   }
 
   async remove(id: number, board_id: number, user_id: number) {
@@ -135,5 +148,68 @@ export class BoardColumnService {
     if (!existingBoardMember) {
       throw new UnauthorizedException('권한이 존재하지 않습니다.');
     }
+  }
+
+  async getOrder(board_id: number) {
+    const boardColums = await this.boardColumnRepository.findBy({ board_id: board_id });
+    if (!boardColums.length) {
+      const order = LexoRank.middle().toString();
+      return order;
+    }
+    const max = await this.boardColumnRepository.findOne({ where: { board_id }, order: { order: 'DESC' } });
+
+    const order = LexoRank.parse(max.order).genNext().toString();
+    return order;
+  }
+
+  async getNewOrder(board_id: number, index: number) {
+    const boardColums = await this.boardColumnRepository.find({ where: { board_id }, order: { order: 'ASC' } });
+
+    console.log('COLUMN LENGTH', boardColums.length, 'INDEX', index);
+
+    // boardColums의 0번째 order의 앞순서가 최소lexorank보다 작거나 boardColums의 마지막 order의 다음순서가 최대lexorank보다 크면 재정렬하기
+    if (LexoRank.parse(boardColums[0].order).genPrev() <= LexoRank.min() || LexoRank.parse(boardColums[boardColums.length - 1].order).genNext() >= LexoRank.max()) this.reOrdering(board_id);
+
+    // index가 boardColums의 길이보다 크면(이동하려는 위치가 마지막카드보다 뒤면) 가장 마지막 카드의 다음 순서로 order 지정
+    if (index > boardColums.length - 1) {
+      return LexoRank.parse(boardColums[boardColums.length - 1].order)
+        .genNext()
+        .toString();
+    }
+
+    // index가 0(가장 처음 위치)이면 prevColumn = null, index + 1이 마지막위치 이후면 nextColumn = null
+    let prevColumn: BoardColumn;
+    let nextColumn: BoardColumn;
+
+    if (index === 0) {
+      prevColumn = null;
+      nextColumn = boardColums[0];
+    } else if (index === boardColums.length - 1) {
+      prevColumn = boardColums[boardColums.length - 1];
+      nextColumn = null;
+    } else {
+      prevColumn = boardColums[index];
+      nextColumn = boardColums[index + 1];
+    }
+
+    console.log('prevColumn >> ', prevColumn);
+    console.log('nextColumn >> ', nextColumn);
+
+    if (!prevColumn) return LexoRank.parse(nextColumn.order).genPrev().toString();
+    if (!nextColumn) return LexoRank.parse(prevColumn.order).genNext().toString();
+
+    const newOrder = LexoRank.parse(prevColumn.order).between(LexoRank.parse(nextColumn.order)).toString();
+    return newOrder;
+  }
+
+  async reOrdering(board_id: number) {
+    const boardColums = await this.boardColumnRepository.find({ where: { board_id }, order: { order: 'ASC' } });
+
+    let newLexoRank = LexoRank.middle();
+    for (let i = 0; i < boardColums.length; i++) {
+      boardColums[i].order = newLexoRank.toString();
+      newLexoRank = newLexoRank.genNext();
+    }
+    return await this.boardColumnRepository.save(boardColums);
   }
 }
