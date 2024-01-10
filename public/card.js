@@ -3,9 +3,9 @@ import { value } from "./value.js";
 
 
 export function initializeCard() {
-  createAddTaskModal();
-  createVeiwTaskModal();
-  
+  drawAddTaskModal();
+  drawVeiwTaskModal();
+
   hideAddTaskModal();
   // hideEditTaskModal();
   hideVeiwTaskModal();
@@ -15,12 +15,12 @@ export function initializeCard() {
 export function showAddTaskModal(columnId) {
   value.cardColumnId = columnId;
   document.getElementById("modal-container").style.display = "flex";
-  
+
   //reset
   document.getElementById("task-title").value = "";
   document.getElementById("task-assignee").value = "";
   document.getElementById("task-due-date").value = "";
-  document.getElementById("task-priority").value = "MEDIUM";
+  document.getElementById("task-priority").value = "1";
   document.getElementById("task-content").value = "";
 
   document.getElementById("submit-btn").style.display = "block";
@@ -32,14 +32,16 @@ export function showAddTaskModal(columnId) {
   document.getElementById("submit-container").style.display = "block";
 }
 
+// 카드 생성 모달 비활성화
 function hideAddTaskModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("submit-container").style.display = "none";
 }
 
+// 카드 편집 모달 비활성화
 function showEditTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
-  
+
   document.getElementById("add-task").style.display = "none";
   document.getElementById("edit-task").style.display = "block";
   document.getElementById("submit-btn").style.display = "none";
@@ -48,16 +50,13 @@ function showEditTaskModal() {
   document.getElementById("submit-container").style.display = "block";
 }
 
-// function hideEditTaskModal() {
-//   document.getElementById("modal-container").style.display = "none";
-//   document.getElementById("submit-container").style.display = "none";
-// }
-
+// 카드 조회 모달 활성화
 function showVeiwTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("task-container").style.display = "block";
 }
 
+// 카드 조회 모달 비활성화
 function hideVeiwTaskModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("task-container").style.display = "none";
@@ -84,7 +83,8 @@ function createFormGroup(labelText, inputId, inputType, placeholder) {
   return group;
 }
 
-function createAddTaskModal() {
+// 카드 추가 모달 그리기
+function drawAddTaskModal() {
   const submitContainer = document.createElement("div");
   submitContainer.id = "submit-container";
 
@@ -92,7 +92,7 @@ function createAddTaskModal() {
   const closeBtn = document.createElement("span");
   closeBtn.id = "close-btn";
   closeBtn.innerHTML = "&times;";
-  closeBtn.onclick = hideAddTaskModal; 
+  closeBtn.onclick = hideAddTaskModal;
 
   // ADD TASK column-header 생성
   const addTaskHeader = document.createElement("div");
@@ -150,9 +150,9 @@ function createAddTaskModal() {
   priorityselect.id = "task-priority";
 
   const priorities = ["HIGH", "MEDIUM", "LOW"];
-  priorities.forEach((priority) => {
+  priorities.forEach((priority, index) => {
     const option = document.createElement("option");
-    option.value = priority;
+    option.value = index;
     option.textContent = priority;
     if (priority === "MEDIUM") {
       option.selected = true; // 기본 선택값 설정
@@ -197,22 +197,37 @@ function createAddTaskModal() {
   submitBtn.textContent = "등록 하기";
 
   submitBtn.addEventListener("click", function () {
+    const columnId = document.getElementById(value.cardColumnId).id;
     const title = document.getElementById("task-title").value;
     const assignee = document.getElementById("task-assignee").value;
     const dueDate = document.getElementById("task-due-date").value;
     const priority = document.getElementById("task-priority").value;
     const content = document.getElementById("task-content").value;
 
-    createTaskCard(
-      document.getElementById(value.cardColumnId),
-      title,
-      assignee,
-      dueDate,
-      priority,
-      content
-    );
-
-    hideAddTaskModal();
+    // 카드 저장 API
+    const accessToken = localStorage.getItem('access_token');
+    axios
+      .post(`/card/${columnId}`,
+        { title, content, deadLine: dueDate, priority },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+      .then((response) => {
+        createTaskCard(
+          columnId,
+          title,
+          assignee,
+          dueDate,
+          priority,
+          content
+        );
+        hideAddTaskModal();
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
   });
 
   // 수정하기 버튼 생성
@@ -255,7 +270,8 @@ function createAddTaskModal() {
   document.getElementById("modal-container").appendChild(submitContainer);
 }
 
-function createVeiwTaskModal() {
+// 카드 조회 모달 그리기
+export function drawVeiwTaskModal() {
   const container = document.createElement("div");
   container.id = "task-container";
 
@@ -270,7 +286,7 @@ function createVeiwTaskModal() {
   columnHeader.textContent = "TASK";
   container.appendChild(columnHeader);
 
-  const createGroup = (label) => {
+  const createGroup = (label, id) => {
     const group = document.createElement("div");
     group.classList.add("group");
 
@@ -279,6 +295,8 @@ function createVeiwTaskModal() {
 
     const labelContent = document.createElement("div");
     labelContent.classList.add("label");
+    labelContent.id = id;
+    labelContent.innerText = label;
 
     group.appendChild(labelElement);
     group.appendChild(labelContent);
@@ -286,17 +304,19 @@ function createVeiwTaskModal() {
     container.appendChild(group);
   };
 
-  createGroup("제목");
-  createGroup("당담자");
-  createGroup("완료일");
-  createGroup("우선순위");
-  createGroup("상태");
-  createGroup("내용");
+  // 여기다!!!!
+  createGroup("제목", "card-view-title");
+  createGroup("당담자", "card-view-assignee");
+  createGroup("완료일", "card-view-dueDate");
+  createGroup("우선순위", "card-view-priority");
+  createGroup("상태", "card-view-title");
+  createGroup("내용", "card-view-content");
 
   document.getElementById("modal-container").appendChild(container);
 }
+
 // 새 태스크 카드를 생성하는 함수
-export function createTaskCard(
+export async function createTaskCard(
   column,
   title,
   assignee,
@@ -304,6 +324,8 @@ export function createTaskCard(
   priority,
   content
 ) {
+  const currentColumn = document.getElementById(column);
+
   const card = document.createElement("div");
   card.classList.add("card");
   card.draggable = true;
@@ -346,7 +368,7 @@ export function createTaskCard(
   buttonbox.appendChild(editButton);
 
   editButton.addEventListener("click", function () {
-    
+
     showEditTaskModal();
 
     const cardData = {
@@ -372,7 +394,7 @@ export function createTaskCard(
     document.getElementById("edit-btn").style.display = "block";
     document.getElementById("add-task").style.display = "none";
     document.getElementById("edit-task").style.display = "block";
-      
+
   });
 
   const deleteButton = document.createElement("button");
@@ -405,11 +427,18 @@ export function createTaskCard(
       !e.target.classList.contains("delete-btn")
     ) {
       showVeiwTaskModal();
+      // 카드 조회 모달 값 갱신
+      document.getElementById("card-view-title").innerText = title;
+      document.getElementById("card-view-assignee").innerText = assignee;
+      document.getElementById("card-view-dueDate").innerText = dueDate;
+      document.getElementById("card-view-priority").innerText = priority;
+      // document.getElementById("card-view-status").innerText = status;
+      document.getElementById("card-view-content").innerText = content;
     }
   });
 
-  column.appendChild(card);
-  moveAddCardButton(column);
+  currentColumn.appendChild(card);
+  moveAddCardButton(currentColumn);
 
   // return card;
 }

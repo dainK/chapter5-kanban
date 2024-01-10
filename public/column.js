@@ -1,5 +1,5 @@
 // import { moveAddColumButton } from "./board.js";
-import { showAddTaskModal } from "./card.js";
+import { showAddTaskModal, createTaskCard } from "./card.js";
 import { value } from "./value.js";
 
 // 칼럼 저장
@@ -34,12 +34,14 @@ export async function loadColumnList(boardId) {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     .then((response) => {
-      console.log('response: ', response);
       board.innerHTML = ``;
       const columns = response.data.columns;
       columns.forEach((column, index) => {
         // drawColumn(column.id, column.title, column.boardMember[0].role); // role은 일단 킵
-        drawColumn(boardId, column.id, column.title, index);
+        drawColumn(boardId, column.id, column.title, index); // 칼럼 그리기
+        column.card.forEach((e) => {
+          createTaskCard(e.board_column_id, e.title, '아영', e.dead_line, e.priority, e.content); // 카드 그리기
+        });
       });
     })
     .catch((error) => {

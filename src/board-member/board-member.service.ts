@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { Board } from 'src/board/entities/board.entity';
 import { User } from 'src/user/entities/user.entity';
+import { EventsGateway } from 'src/events/events.gateway';
 
 @Injectable()
 export class BoardMemberService {
@@ -16,6 +17,7 @@ export class BoardMemberService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   async create(board_id: number, user_id: number, select_user_id: number, role: number) {
@@ -34,6 +36,7 @@ export class BoardMemberService {
       role,
     });
 
+    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(),message:"보드멤버로 초대 되었습니다."});
     return { message: '보드 멤버 추가가 완료되었습니다.' };
   }
 
@@ -112,6 +115,7 @@ export class BoardMemberService {
 
     // 보드 멤버 삭제
     await this.boardMemberRepository.delete({ board_id, user_id: select_user_id });
+    this.eventsGateway.handleSendRoomMessage({ roomName:select_user_id.toString(),message:"보드멤버에서 제외 되었습니다."})
     return { message: '보드 멤버 삭제가 완료되었습니다.' };
   }
 

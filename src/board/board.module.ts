@@ -9,6 +9,7 @@ import { BoardController } from './board.controller';
 import { Board } from './entities/board.entity';
 import { BoardMember } from 'src/board-member/entities/board-member.entity';
 
+
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -19,7 +20,7 @@ import { BoardMember } from 'src/board-member/entities/board-member.entity';
     }),
     RedisModule,
     TypeOrmModule.forFeature([Board]),
-    TypeOrmModule.forFeature([BoardMember]),
+    TypeOrmModule.forFeature([BoardMember])
   ],
   controllers: [BoardController],
   providers: [BoardService],

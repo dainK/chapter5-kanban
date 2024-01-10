@@ -9,6 +9,7 @@ import { BoardMemberController } from './board-member.controller';
 import { BoardMember } from './entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Board } from 'src/board/entities/board.entity';
+import { EventsModule } from 'src/events/events.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { Board } from 'src/board/entities/board.entity';
     TypeOrmModule.forFeature([BoardMember]),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Board]),
+    EventsModule
   ],
   controllers: [BoardMemberController],
   providers: [BoardMemberService],

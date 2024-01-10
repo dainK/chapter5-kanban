@@ -23,6 +23,7 @@ import { CommentModule } from './comment/comment.module';
 import { CardMemberModule } from './card-member/card-member.module';
 import { CardMember } from './card-member/entities/card-member.entity';
 import { Comment } from './comment/entities/comment.entity';
+import { EventsModule } from './events/events.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -74,6 +75,7 @@ const typeOrmModuleOptions = {
     BoardModule,
     BoardColumnModule,
     BoardMemberModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],
