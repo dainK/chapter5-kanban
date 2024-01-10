@@ -7,6 +7,9 @@ export function initializeBoard() {
   createInviteUserListModal(); // 보드 멤버 초대 모달 생성
   showInviteUserListModal(); //보드 멤버 초대 모달 활성화
   hideInviteUserListModal(); // 보드 멤버 초대 모달 비활성화
+  createBoardMemberListModal(); // 보드 멤버 조회 모달 생성
+  showBoardMemberListModal(); //보드 멤버 조회 모달 활성화
+  hideBoardMemberListModal(); // 보드 멤버 조회 모달 비활성화
 }
 
 // export function moveAddColumButton() {
@@ -294,6 +297,8 @@ async function drawBoard(boardId, title) {
   boardList.appendChild(clickableDiv);
 }
 
+
+//////////////////////////////////////// 보드 멤버 초대
 // 보드 멤버 초대 모달 활성화
 function showInviteUserListModal() {
   const inviteUserListSearchBtn = document.getElementById("invite-user-list-search");
@@ -302,11 +307,6 @@ function showInviteUserListModal() {
     document.getElementById("invite-user-list-container").style.display = "block";
   });
 }
-
-// 보드 멤버 초대 모달 활성화
-// export function showInviteUserListModal() {
-
-// }
 
 // 보드 멤버 초대 모달 비활성화
 function hideInviteUserListModal() {
@@ -447,6 +447,160 @@ async function drawInviteUserList(users) {
 
       // 결과 목록에 리스트 아이템 추가
       inviteUserSearchResults.appendChild(listItem);
+    });
+  }
+}
+
+/////////////////////////////////////////////////////// 보드 멤버
+// 보드 멤버 초대 모달 활성화
+function showBoardMemberListModal() {
+  const boardMemberListSearchBtn = document.getElementById("board-member-list-search");
+  boardMemberListSearchBtn.addEventListener('click', function () {
+    document.getElementById("modal-container").style.display = "flex";
+    document.getElementById("board-member-list-container").style.display = "block";
+  });
+}
+
+// 보드 멤버 초대 모달 비활성화
+function hideBoardMemberListModal() {
+  document.getElementById("modal-container").style.display = "none";
+  document.getElementById("board-member-list-container").style.display = "none";
+}
+
+// 보드 유저 초대 검색 모달 생성
+function createBoardMemberListModal() {
+  // 모달 컨테이너 생성
+  const modalContainer = document.createElement("div");
+  modalContainer.id = "board-member-list-container";
+  modalContainer.classList.add("modal-container");
+  document.getElementById("modal-container").appendChild(modalContainer);
+
+  // 닫기 버튼 생성
+  const closeButton = document.createElement("span");
+  closeButton.id = "close-board-btn";
+  closeButton.textContent = "×";
+  closeButton.onclick = hideBoardMemberListModal; // closeModal 함수를 클릭 이벤트에 연결
+  modalContainer.appendChild(closeButton);
+
+  // 모달 헤더 생성
+  const modalHeader = document.createElement("div");
+  modalHeader.classList.add("column-header");
+  modalHeader.textContent = "보드 멤버 목록";
+  modalContainer.appendChild(modalHeader);
+
+  // 로그인 폼 생성
+  const boardMemberListForm = document.createElement("div");
+  boardMemberListForm.classList.add("form");
+  modalContainer.appendChild(boardMemberListForm);
+
+  // 사용자 검색 폼
+  const boardMemberListSearchGroup = createFormGroup("", "board-member-search-input", "text", "사용자 이름 또는 이메일로 검색");
+  boardMemberListForm.appendChild(boardMemberListSearchGroup);
+
+  // 사용자 목록 Ul
+  const boardMemberListUl = document.createElement("ul");
+  boardMemberListUl.id = "board-member-search-results";
+  modalContainer.appendChild(boardMemberListUl);
+
+  const memberKeyword = document.getElementById('board-member-search-input');
+  memberKeyword.addEventListener("input", (event) => {
+    if (memberKeyword.value === "") {
+      console.log("검색어 없음");
+      // member 목록 조회 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.get(`/board-member/${currentBoardId}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+        .then(response => {
+          console.log('response: ', response);
+          const boardMembers = response.data.boardMembers;
+          drawBoardMemberList(boardMembers); // 사용자 조회 결과 그리기기
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+    if (memberKeyword.value !== "") {
+      console.log("검색어 있음");
+      // member 목록 검색 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.get(`/board-member/${currentBoardId}/${memberKeyword.value}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+        .then(response => {
+          console.log('response: ', response);
+          const boardMembers = response.data.boardMembers;
+          drawBoardMemberList(boardMembers); // 사용자 조회 결과 그리기기
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  });
+}
+
+async function drawBoardMemberList(boardMembers) {
+  console.log('boardMembers: ', boardMembers);
+  // 리스트 만들기!!!!!
+  const boardMemberSearchResults = document.getElementById('board-member-search-results');
+
+  // 검색 결과 목록 초기화
+  boardMemberSearchResults.innerHTML = '';
+
+  // 검색어와 일치하는 사람을 찾아서 결과 목록에 추가
+  if (boardMembers) {
+    boardMembers.forEach(boardMember => {
+      console.log('boardMember: ', boardMember);
+      const listItem = document.createElement('li');
+      listItem.classList.add('searchResultUser');
+      listItem.textContent = `이메일 : ${boardMember.email} 이름 : ${boardMember.name}`;
+
+      // 콤보박스 생성
+      const roleComboBox = document.createElement('select');
+      roleComboBox.classList.add('roleComboBox');
+
+      // role 옵션 추가
+      // admin은 만지지 못 하도록 설정 필요
+      const adminOption = document.createElement('option');
+      adminOption.value = '0';
+      adminOption.textContent = 'admin';
+      roleComboBox.appendChild(adminOption);
+
+      const editorOption = document.createElement('option');
+      editorOption.value = '1';
+      editorOption.textContent = 'editor';
+      roleComboBox.appendChild(editorOption);
+
+      const viewerOption = document.createElement('option');
+      viewerOption.value = '2';
+      viewerOption.textContent = 'viewer';
+      roleComboBox.appendChild(viewerOption);
+
+      // 콤보박스에 값 설정
+      roleComboBox.value = boardMember.boardMember[0].role;
+
+      // 콤보박스에 이벤트 리스너 추가
+      roleComboBox.addEventListener('change', (event) => {
+        const selectedRole = event.target.value;
+        const accessToken = localStorage.getItem('access_token');
+        axios.patch(`/board-member/${currentBoardId}/${boardMember.id}`,
+          { role: selectedRole },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        )
+          .then(response => {
+            console.log('response: ', response);
+            alert("권한 수정이 완료되었습니다.");
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      });
+
+      // 리스트 아이템에 콤보박스 추가
+      listItem.appendChild(roleComboBox);
+
+      // 결과 목록에 리스트 아이템 추가
+      boardMemberSearchResults.appendChild(listItem);
     });
   }
 }
