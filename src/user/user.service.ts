@@ -74,26 +74,45 @@ export class UserService {
     };
   }
 
-  async findAll(boardId: number) {
+  async findAll(board_id: number, user_id: number) {
     // 유저 목록 조회
     // const users = await this.userRepository.find();
 
-    const users = await this.userRepository.createQueryBuilder('user').leftJoinAndSelect('user.boardMember', 'boardMember').where('boardMember.board_id IS NULL').select(['user.id', 'user.email', 'user.name']).getMany();
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.email', 'user.name'])
+      .leftJoinAndSelect('user.boardMember', 'boardMember')
+      .where('user.id != :user_id', { user_id })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('boardMember.board_id != :board_id', { board_id })
+            .orWhere('boardMember.board_id IS NULL');
+        }),
+      )
+
+      .getMany();
     return { users };
   }
 
-  async searchAll(boardId: number, userKeyword: string) {
-    const keywordPattern = `%${userKeyword}%`;
+  async searchAll(board_id: number, user_id: number, user_keyword: string) {
     // 칼럼 목록 조회
-    const users = await this.userRepository.createQueryBuilder('user')
-    .leftJoinAndSelect('user.boardMember', 'boardMember')
-    .where('boardMember.board_id IS NULL')
-    .andWhere(new Brackets(qb => {
-      qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${userKeyword}%` })
-        .orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${userKeyword}%` })
-    }))
-    .select(['user.id', 'user.email', 'user.name'])
-    .getMany();
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.email', 'user.name'])
+      .leftJoinAndSelect('user.boardMember', 'boardMember')
+      .where(
+        new Brackets((qb) => {
+          qb.where('boardMember.board_id != :board_id', { board_id })
+            .orWhere('boardMember.board_id IS NULL');
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` })
+            .orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` });
+        }),
+      )
+      .getMany();
 
     return { users };
   }
