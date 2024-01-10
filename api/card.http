@@ -52,12 +52,12 @@ Content-Type: application/json
 
 ###
 # 카드 수정
-PATCH {{domain}}/card/4
+PATCH {{domain}}/card/5
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "index": 3
+    "content": "wowwwww"
 }
 
 ###
