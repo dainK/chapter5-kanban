@@ -15,7 +15,7 @@ export async function createColumn(boardId, columnId, columnTitle) {
     )
     .then((response) => {
       console.log('response: ', response);
-      drawColumn(columnId, columnTitle);
+      drawColumn(boardId, columnId, columnTitle);
     })
     .catch((error) => {
       console.log('error: ', error);
@@ -92,7 +92,21 @@ export function drawColumn(boardId, columnId, columnTitle, index) {
 
   trashButton.addEventListener("click", function () {
     if (confirm("이 열을 삭제하시겠습니까?")) {
-      column.remove();
+      // 사용자가 '확인'을 클릭한 경우
+      // 칼럼 정보 삭제 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.delete(`/board-column/${boardId}/${columnId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          column.remove();
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
     }
   });
 
