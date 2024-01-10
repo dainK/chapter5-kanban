@@ -14,12 +14,12 @@ export class CardMemberService {
   async create(createCardMemberDto: CreateCardMemberDto) {
     return await this.cardMemberRepository.save({
       card_id: createCardMemberDto.cardId,
-      user_id: createCardMemberDto.userId,
+      board_member_id: createCardMemberDto.userId,
     });
   }
 
   async findAllByUserId(userId: number) {
-    const cards = await this.cardMemberRepository.findBy({ user_id: userId });
+    const cards = await this.cardMemberRepository.findBy({ board_member_id: userId });
 
     return cards.map((card) => {
       return {
@@ -29,11 +29,11 @@ export class CardMemberService {
   }
 
   async findAllByCardId(cardId: number) {
-    const users = await this.cardMemberRepository.findBy({ card_id: cardId });
+    const members = await this.cardMemberRepository.findBy({ card_id: cardId });
 
-    return users.map((user) => {
+    return members.map((member) => {
       return {
-        user_id: user.user_id,
+        board_member_id: member.board_member_id,
       };
     });
   }
