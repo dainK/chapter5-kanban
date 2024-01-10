@@ -36,7 +36,7 @@ export class BoardService {
   // 보드 목록 조회(보드 멤버들만)
   async findAll(user_id: number) {
     // 로그인 한 사용자의 보드 목록 조회
-    const boards = await this.boardRepository.createQueryBuilder('board').leftJoin('board.boardMember', 'boardMember').select(['board.id', 'board.title', 'board.user_id']).where('boardMember.user_id = :user_id', { user_id }).getMany();
+    const boards = await this.boardRepository.createQueryBuilder('board').leftJoin('board.boardMember', 'boardMember').select(['board.id', 'board.title', 'board.user_id', 'boardMember.role']).where('boardMember.user_id = :user_id', { user_id }).getMany();
     return { boards };
   }
 
@@ -91,8 +91,8 @@ export class BoardService {
     // join문으로 처리해야하남? - 이아영
     const existingBoardMember = await this.boardMemberRepository.findOne({
       where: [
-        { id, user_id, role: 0 },
-        { id, user_id, role: 1 },
+        { board_id: id, user_id, role: 0 },
+        { board_id: id, user_id, role: 1 },
       ],
     });
 
@@ -106,7 +106,7 @@ export class BoardService {
   async checkBoardMember(id: number, user_id: number): Promise<Board | any> {
     // join문으로 처리해야하남? - 이아영
     const existingBoardMember = await this.boardMemberRepository.findOne({
-      where: { id, user_id },
+      where: { board_id: id, user_id },
     });
 
     // ERR : 포함된 보드가 존재하지 않을 경우

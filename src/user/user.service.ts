@@ -75,45 +75,32 @@ export class UserService {
   }
 
   async findAll(board_id: number, user_id: number) {
-    // 유저 목록 조회
-    // const users = await this.userRepository.find();
+    // 본인 포함하여 보드에 포함되지 않은 유저 목록 조회
+    // 보드 멤버에 추가되어있지 않은 회원 번호 조회
+    const excludedUserIds = await this.boardMemberRepository.createQueryBuilder('boardMember').select('boardMember.user_id').where('boardMember.board_id = :board_id', { board_id }).getMany();
+    const excludedUserIdsArray = excludedUserIds.map((boardMember) => boardMember.user_id);
 
-    const users = await this.userRepository
-      .createQueryBuilder('user')
-      .select(['user.id', 'user.email', 'user.name'])
-      .leftJoinAndSelect('user.boardMember', 'boardMember')
-      .where('user.id != :user_id', { user_id })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('boardMember.board_id != :board_id', { board_id })
-            .orWhere('boardMember.board_id IS NULL');
-        }),
-      )
-
-      .getMany();
+    // 본인을 제외한 회원 목록 조회
+    const users = await this.userRepository.createQueryBuilder('user').where('user.id NOT IN (:...excludedUserIds)', { excludedUserIds: excludedUserIdsArray }).andWhere('user.id != :excludedUserId', { excludedUserId: user_id }).getMany();
     return { users };
   }
 
   async searchAll(board_id: number, user_id: number, user_keyword: string) {
-    // 칼럼 목록 조회
+    // 본인 포함하여 보드에 포함되지 않은 유저 목록 조회
+    // 보드 멤버에 추가되어있지 않은 회원 번호 조회
+    const excludedUserIds = await this.boardMemberRepository.createQueryBuilder('boardMember').select('boardMember.user_id').where('boardMember.board_id = :board_id', { board_id }).getMany();
+    const excludedUserIdsArray = excludedUserIds.map((boardMember) => boardMember.user_id);
+
     const users = await this.userRepository
       .createQueryBuilder('user')
-      .select(['user.id', 'user.email', 'user.name'])
-      .leftJoinAndSelect('user.boardMember', 'boardMember')
-      .where(
-        new Brackets((qb) => {
-          qb.where('boardMember.board_id != :board_id', { board_id })
-            .orWhere('boardMember.board_id IS NULL');
-        }),
-      )
+      .where('user.id NOT IN (:...excludedUserIds)', { excludedUserIds: excludedUserIdsArray })
+      .andWhere('user.id != :excludedUserId', { excludedUserId: user_id })
       .andWhere(
         new Brackets((qb) => {
-          qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` })
-            .orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` });
+          qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` }).orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` });
         }),
       )
       .getMany();
-
     return { users };
   }
 

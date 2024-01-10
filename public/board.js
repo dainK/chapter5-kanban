@@ -18,6 +18,8 @@ export function initializeBoard() {
 // }
 
 let currentBoardId;
+let currentBoardMemberRole;
+
 
 function initailizeBoardTitle() {
   const boardname = document.getElementById('board-name');
@@ -134,7 +136,8 @@ function initailizeBoardBody() {
   }
 }
 
-export async function loadboard(boardId) {
+export async function loadboard(boardId, role) {
+  document.getElementById('main-container').style.display = 'flex';
   value.boardId = boardId;
   const accessToken = await localStorage.getItem('access_token');
   await axios
@@ -146,10 +149,14 @@ export async function loadboard(boardId) {
       value.boardName = board.title;
     })
     .catch((error) => {
-      console.log('error: ', error);
       alert(error.response.data.message);
     });
   document.getElementById('board-title').innerText = value.boardName;
+
+  const inviteUserBtn = document.getElementById('invite-user-list-search');
+
+  if (role === 0) inviteUserBtn.style.display = 'block';
+  if (role !== 0) inviteUserBtn.style.display = 'none';
 }
 
 // 보드 목록 조회
@@ -157,9 +164,6 @@ export async function loadBoardList() {
   const boardList = document.getElementById('board-list');
   const accessToken = await localStorage.getItem('access_token');
   boardList.innerHTML = ``;
-  // const text = document.createElement("p");
-  // text.innerText = `내 보드 목록`;
-  // boardList.appendChild(text);
 
   // 보드 목록 조회 API
   await axios
@@ -169,7 +173,7 @@ export async function loadBoardList() {
     .then((response) => {
       const boards = response.data.boards;
       boards.forEach((element) => {
-        drawBoard(element.id, element.title);
+        drawBoard(element.id, element.title, element.boardMember[0].role);
       });
     })
     .catch((error) => {
@@ -195,8 +199,9 @@ async function createBoard() {
       const board = response.data.board;
       const boardId = board.id;
       const title = board.title;
+      const role = board.boardMember[0].role;
 
-      drawBoard(boardId, title); // 새로 생성된 보드 그리기
+      drawBoard(boardId, title, role); // 새로 생성된 보드 그리기
       drawPlusBoard('create'); // 보드 추가 버튼 그리기
     })
     .catch((error) => {
@@ -248,7 +253,7 @@ async function updateBoard(boardId, title) {
 }
 
 // 보드 그리기
-async function drawBoard(boardId, title) {
+async function drawBoard(boardId, title, role) {
   const boardList = document.getElementById('board-list');
 
   const clickableDiv = document.createElement('a');
@@ -258,17 +263,18 @@ async function drawBoard(boardId, title) {
 
   // 클릭 이벤트 리스너 추가
   clickableDiv.addEventListener('click', function (e) {
-    loadboard(boardId);
+    loadboard(boardId, role);
     currentBoardId = boardId;
-    console.log('boardId: ', boardId);
-    console.log('currentBoardId: ', currentBoardId);
+    currentBoardMemberRole = role;
   });
 
   const trashButton = document.createElement('div');
   trashButton.innerHTML = `<span class="board-trash-button">
   <span class="material-symbols-outlined">delete</span>
   </span>`;
-  clickableDiv.appendChild(trashButton);
+
+  // 사용자가 보드 Admin인 경우
+  if (role === 0) clickableDiv.appendChild(trashButton);
 
   trashButton.addEventListener('click', function () {
     if (confirm('보드를 삭제하시겠습니까?')) {
@@ -305,6 +311,22 @@ function showInviteUserListModal() {
   inviteUserListSearchBtn.addEventListener('click', function () {
     document.getElementById("modal-container").style.display = "flex";
     document.getElementById("invite-user-list-container").style.display = "block";
+
+    // 검색 입력란 초기화
+    document.getElementById("invite-user-search-input").value = "";
+
+    // user 목록 조회 API
+    const accessToken = localStorage.getItem('access_token');
+    axios.get(`/user/${currentBoardId}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    )
+      .then(response => {
+        const users = response.data.users;
+        drawInviteUserList(users); // 사용자 조회 결과 그리기기
+      })
+      .catch(error => {
+        console.error(error);
+      });
   });
 }
 
@@ -370,6 +392,7 @@ function createInviteUserListModal() {
   // 사용자 목록 Ul
   const inviteUserListUl = document.createElement("ul");
   inviteUserListUl.id = "invite-user-search-results";
+  inviteUserListUl.classList.add('board-ul');
   modalContainer.appendChild(inviteUserListUl);
 
   const userKeyword = document.getElementById('invite-user-search-input');
@@ -389,7 +412,6 @@ function createInviteUserListModal() {
         });
     }
     if (userKeyword.value !== "") {
-      console.log("검색어 있음");
       // user 목록 검색 API
       const accessToken = localStorage.getItem('access_token');
       axios.get(`/user/list/${currentBoardId}/${userKeyword.value}`,
@@ -418,6 +440,7 @@ async function drawInviteUserList(users) {
     users.forEach(user => {
       const listItem = document.createElement('li');
       listItem.classList.add('searchResultUser');
+      listItem.classList.add('board-li');
       listItem.textContent = `이메일 : ${user.email} 이름 : ${user.name}`;
 
       // 초대 버튼 생성
@@ -458,6 +481,23 @@ function showBoardMemberListModal() {
   boardMemberListSearchBtn.addEventListener('click', function () {
     document.getElementById("modal-container").style.display = "flex";
     document.getElementById("board-member-list-container").style.display = "block";
+
+    // 검색 입력란 초기화
+    document.getElementById("board-member-search-input").value = "";
+
+    // member 목록 조회 API
+    const accessToken = localStorage.getItem('access_token');
+    axios.get(`/board-member/${currentBoardId}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    )
+      .then(response => {
+        console.log('response: ', response);
+        const boardMembers = response.data.boardMembers;
+        drawBoardMemberList(boardMembers); // 사용자 조회 결과 그리기기
+      })
+      .catch(error => {
+        console.error(error);
+      });
   });
 }
 
@@ -500,12 +540,12 @@ function createBoardMemberListModal() {
   // 사용자 목록 Ul
   const boardMemberListUl = document.createElement("ul");
   boardMemberListUl.id = "board-member-search-results";
+  boardMemberListUl.classList.add('board-ul');
   modalContainer.appendChild(boardMemberListUl);
 
   const memberKeyword = document.getElementById('board-member-search-input');
   memberKeyword.addEventListener("input", (event) => {
     if (memberKeyword.value === "") {
-      console.log("검색어 없음");
       // member 목록 조회 API
       const accessToken = localStorage.getItem('access_token');
       axios.get(`/board-member/${currentBoardId}`,
@@ -521,7 +561,6 @@ function createBoardMemberListModal() {
         });
     }
     if (memberKeyword.value !== "") {
-      console.log("검색어 있음");
       // member 목록 검색 API
       const accessToken = localStorage.getItem('access_token');
       axios.get(`/board-member/${currentBoardId}/${memberKeyword.value}`,
@@ -540,7 +579,6 @@ function createBoardMemberListModal() {
 }
 
 async function drawBoardMemberList(boardMembers) {
-  console.log('boardMembers: ', boardMembers);
   // 리스트 만들기!!!!!
   const boardMemberSearchResults = document.getElementById('board-member-search-results');
 
@@ -553,6 +591,7 @@ async function drawBoardMemberList(boardMembers) {
       console.log('boardMember: ', boardMember);
       const listItem = document.createElement('li');
       listItem.classList.add('searchResultUser');
+      listItem.classList.add('board-li');
       listItem.textContent = `이메일 : ${boardMember.email} 이름 : ${boardMember.name}`;
 
       // 콤보박스 생성
@@ -564,6 +603,8 @@ async function drawBoardMemberList(boardMembers) {
       const adminOption = document.createElement('option');
       adminOption.value = '0';
       adminOption.textContent = 'admin';
+      adminOption.disabled = true;
+      adminOption.style.display = 'none';
       roleComboBox.appendChild(adminOption);
 
       const editorOption = document.createElement('option');
@@ -579,6 +620,9 @@ async function drawBoardMemberList(boardMembers) {
       // 콤보박스에 값 설정
       roleComboBox.value = boardMember.boardMember[0].role;
 
+      // 보드 멤버의 role가 admin일 경우/로그인 한 사용자의 role가 0 또는 1이 아닐 경우 role 콤보박스 비활성화
+      if (boardMember.boardMember[0].role === 0 || currentBoardMemberRole !== 0 && currentBoardMemberRole !== 1) roleComboBox.disabled = true;
+
       // 콤보박스에 이벤트 리스너 추가
       roleComboBox.addEventListener('change', (event) => {
         const selectedRole = event.target.value;
@@ -593,11 +637,42 @@ async function drawBoardMemberList(boardMembers) {
           })
           .catch(error => {
             console.error(error);
+            alert(error.response.data.message);
+            roleComboBox.value = 0;
           });
       });
 
       // 리스트 아이템에 콤보박스 추가
       listItem.appendChild(roleComboBox);
+
+      // 삭제 버튼
+      const trashButton = document.createElement('div');
+      trashButton.innerHTML = `<span class="board-trash-button">
+        <span class="material-symbols-outlined">delete</span>
+        </span>`;
+      if (boardMember.boardMember[0].role !== 0 && currentBoardMemberRole === 0 || currentBoardMemberRole === 1) listItem.appendChild(trashButton);
+
+      trashButton.addEventListener('click', function () {
+        if (confirm('보드 멤버를 삭제하시겠습니까?')) {
+          // 사용자가 '확인'을 클릭한 경우
+          // 보드 정보 삭제 API
+          const accessToken = localStorage.getItem('access_token');
+          axios.delete(`/board-member/${currentBoardId}/${boardMember.id}`,
+            {
+              headers: { Authorization: `Bearer ${accessToken}` }
+            }
+          )
+            .then(response => {
+              console.log('response: ', response);
+              alert("삭제가 완료되었습니다.");
+            })
+            .catch(error => {
+              console.log('error: ', error);
+              alert(error.response.data.message);
+            });
+          listItem.remove();
+        }
+      });
 
       // 결과 목록에 리스트 아이템 추가
       boardMemberSearchResults.appendChild(listItem);

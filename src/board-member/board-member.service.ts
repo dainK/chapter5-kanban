@@ -42,7 +42,7 @@ export class BoardMemberService {
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
 
     // 보드 멤버 목록 조회
-    const boardMembers = await this.userRepository.createQueryBuilder('user').leftJoin('user.boardMember', 'boardMember').select(['user.id', 'user.email', 'user.name', 'boardMember.role']).where('boardMember.board_id = :board_id', { board_id }).getMany();
+    const boardMembers = await this.userRepository.createQueryBuilder('user').leftJoin('user.boardMember', 'boardMember').select(['user.id', 'user.email', 'user.name', 'boardMember.role']).where('boardMember.board_id = :board_id', { board_id }).orderBy('boardMember.role', 'ASC').getMany();
 
     return { boardMembers };
   }
@@ -63,6 +63,7 @@ export class BoardMemberService {
           qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${memberKeyword}%` }).orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${memberKeyword}%` });
         }),
       )
+      .orderBy('boardMember.role', 'ASC')
       .getMany();
 
     return { boardMembers };
@@ -83,12 +84,10 @@ export class BoardMemberService {
   async update(board_id: number, user_id: number, select_user_id: number, role: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMemberRole(board_id, user_id); // 로그인 한 사용자의 role 조회
-
     const boardMember = await this.findBoardMember(board_id, select_user_id); // 보드 멤버 조회
     if (!boardMember) {
       throw new ConflictException('멤버가 등록되지 않았습니다.');
     }
-
     // ERR : 삭제하려는 멤버의 role이 0(Admin)인 경우
     if (boardMember.role === 0) {
       throw new NotFoundException('Admin은 수정할 수 없습니다.');
