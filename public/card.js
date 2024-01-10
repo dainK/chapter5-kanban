@@ -3,8 +3,8 @@ import { value } from "./value.js";
 
 
 export function initializeCard() {
-  createAddTaskModal();
-  createVeiwTaskModal();
+  drawAddTaskModal();
+  drawVeiwTaskModal();
 
   hideAddTaskModal();
   // hideEditTaskModal();
@@ -32,11 +32,13 @@ export function showAddTaskModal(columnId) {
   document.getElementById("submit-container").style.display = "block";
 }
 
+// 카드 생성 모달 비활성화
 function hideAddTaskModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("submit-container").style.display = "none";
 }
 
+// 카드 편집 모달 비활성화
 function showEditTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
 
@@ -48,16 +50,13 @@ function showEditTaskModal() {
   document.getElementById("submit-container").style.display = "block";
 }
 
-// function hideEditTaskModal() {
-//   document.getElementById("modal-container").style.display = "none";
-//   document.getElementById("submit-container").style.display = "none";
-// }
-
+// 카드 조회 모달 활성화
 function showVeiwTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
   document.getElementById("task-container").style.display = "block";
 }
 
+// 카드 조회 모달 비활성화
 function hideVeiwTaskModal() {
   document.getElementById("modal-container").style.display = "none";
   document.getElementById("task-container").style.display = "none";
@@ -84,7 +83,8 @@ function createFormGroup(labelText, inputId, inputType, placeholder) {
   return group;
 }
 
-function createAddTaskModal() {
+// 카드 추가 모달 그리기
+function drawAddTaskModal() {
   const submitContainer = document.createElement("div");
   submitContainer.id = "submit-container";
 
@@ -215,14 +215,13 @@ function createAddTaskModal() {
       )
       .then((response) => {
         createTaskCard(
-          document.getElementById(value.cardColumnId),
+          columnId,
           title,
           assignee,
           dueDate,
           priority,
           content
         );
-        // drawColumn(boardId, columnId, columnTitle);
         hideAddTaskModal();
       })
       .catch((error) => {
@@ -271,7 +270,8 @@ function createAddTaskModal() {
   document.getElementById("modal-container").appendChild(submitContainer);
 }
 
-function createVeiwTaskModal() {
+// 카드 조회 모달 그리기
+export function drawVeiwTaskModal() {
   const container = document.createElement("div");
   container.id = "task-container";
 
@@ -312,7 +312,7 @@ function createVeiwTaskModal() {
   document.getElementById("modal-container").appendChild(container);
 }
 // 새 태스크 카드를 생성하는 함수
-export function createTaskCard(
+export async function createTaskCard(
   column,
   title,
   assignee,
@@ -320,6 +320,8 @@ export function createTaskCard(
   priority,
   content
 ) {
+  const currentColumn = document.getElementById(column);
+
   const card = document.createElement("div");
   card.classList.add("card");
   card.draggable = true;
@@ -424,8 +426,8 @@ export function createTaskCard(
     }
   });
 
-  column.appendChild(card);
-  moveAddCardButton(column);
+  currentColumn.appendChild(card);
+  moveAddCardButton(currentColumn);
 
   // return card;
 }

@@ -34,16 +34,18 @@ export class BoardColumnService {
     return { message: '칼럼 저장이 완료되었습니다.', boardColum };
   }
 
-  // 특정 보드의 칼럼 전체 조회(보드 멤버들만~)
+  // 특정 보드의 칼럼, 카드 전체 조회(보드 멤버들만~)
   async findAll(board_id: number, user_id: number) {
     await this.findOneBoard(board_id); // 보드 정보 조회
     await this.checkBoardMember(board_id, user_id); // 보드 멤버 조회
 
-    // 칼럼 목록 조회
-    // const columns = await this.boardColumnRepository.createQueryBuilder('board_column').where('board_column.board_id', { board_id: board_id }).orderBy('board_column.order', 'ASC').getMany();
-
-    const columns = await this.boardColumnRepository.find({ where: { board_id }, order: { order: 'ASC' } });
-
+    // 칼럼, 카드 목록 조회
+    const columns = await this.boardColumnRepository
+      .createQueryBuilder('boardColumn')
+      .leftJoinAndSelect('boardColumn.card', 'card') // 'cards'는 BoardColumn 엔티티 내에 정의된 관계의 이름이어야 합니다.
+      .where('boardColumn.board_id = :boardId', { boardId: board_id })
+      .orderBy('boardColumn.order', 'ASC')
+      .getMany();
     return { columns };
   }
 
