@@ -452,7 +452,7 @@ async function drawInviteUserList(users) {
         )
           .then(response => {
             console.log('response: ', response);
-            alert("멤버 초대가 완료되었습니다.");
+            // alert("멤버 초대가 완료되었습니다.");
             listItem.remove();
           })
           .catch(error => {
@@ -627,7 +627,7 @@ async function drawBoardMemberList(boardMembers) {
         )
           .then(response => {
             console.log('response: ', response);
-            alert("권한 수정이 완료되었습니다.");
+            // alert("권한 수정이 완료되었습니다.");
           })
           .catch(error => {
             console.error(error);
@@ -658,7 +658,7 @@ async function drawBoardMemberList(boardMembers) {
           )
             .then(response => {
               console.log('response: ', response);
-              alert("삭제가 완료되었습니다.");
+              // alert("삭제가 완료되었습니다.");
             })
             .catch(error => {
               console.log('error: ', error);
