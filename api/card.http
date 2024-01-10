@@ -9,18 +9,17 @@ POST {{domain}}/user/login
 Content-Type: application/json
 
 {
-	"email":"admin@gmail.com",
+	"email":"test1@gmail.com",
 	"password":"test_pw"
 }
 
 ###
 # 카드 등록
-POST {{domain}}/card
+POST {{domain}}/card/8
+Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "boardColumnId": 1,
-    "userId": 1,
     "title": "Todo test",
     "content": "Todo test - content",
     "deadLine": "2024-01-28",
@@ -32,32 +31,37 @@ Content-Type: application/json
 GET {{domain}}/card
 Content-Type: application/json
 
+
+###
+# # 특정 보드 카드 조회
+# GET {{domain}}/card/board/8
+# Content-Type: application/json
+
+
 ###
 # 특정 컬럼 카드 조회
-# @name loginToken
-GET {{domain}}/card/column/1
+GET {{domain}}/card/boardColumn/8
 Content-Type: application/json
 
 
 ###
 # 카드 상세 조회
-# @name loginToken
-GET {{domain}}/card/2
+GET {{domain}}/card/4
 Content-Type: application/json
 
 
 ###
 # 카드 수정
-PATCH {{domain}}/card/2
-# Authorization: Bearer {{AccessToken}}
+PATCH {{domain}}/card/4
+Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "index": 0
+    "index": 3
 }
 
 ###
 # 카드 삭제
 DELETE {{domain}}/card/1
-# Authorization: Bearer {{AccessToken}}
+Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
