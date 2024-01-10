@@ -15,7 +15,8 @@ export async function createColumn(boardId, columnId, columnTitle) {
     )
     .then((response) => {
       console.log('response: ', response);
-      drawColumn(boardId, columnId, columnTitle);
+      // drawColumn(boardId, columnId, columnTitle);
+      loadColumnList(boardId);
     })
     .catch((error) => {
       console.log('error: ', error);
