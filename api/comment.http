@@ -9,59 +9,50 @@ POST {{domain}}/user/login
 Content-Type: application/json
 
 {
-	"email":"test1@gmail.com",
+	"email":"admin@gmail.com",
 	"password":"test_pw"
 }
 
 ###
-# 카드 등록
-POST {{domain}}/card/8
+# 댓글 등록 @Param(cardId), @Body (comment)
+POST {{domain}}/comment/4
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "title": "Todo test",
-    "content": "Todo test - content",
-    "deadLine": "2024-01-28",
-    "priority": 0
+    "comment": "siasia"
 }
 
 ###
-# 카드 전체 조회
-GET {{domain}}/card
-Content-Type: application/json
-
-
-###
-# # 특정 보드 카드 조회
-# GET {{domain}}/card/board/8
+# # 댓글 전체 조회
+# GET {{domain}}/comment
 # Content-Type: application/json
 
 
 ###
-# 특정 컬럼 카드 조회
-GET {{domain}}/card/boardColumn/8
+# 특정 카드 댓글 조회 @Param(cardId)
+GET {{domain}}/comment/ofCard/4
 Content-Type: application/json
 
 
 ###
-# 카드 상세 조회
-GET {{domain}}/card/4
+# 댓글 상세 조회 @Param(id)
+GET {{domain}}/comment/4
 Content-Type: application/json
 
 
 ###
-# 카드 수정
-PATCH {{domain}}/card/5
+# 댓글 수정 @Param(id)
+PATCH {{domain}}/comment/7
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
 
 {
-    "content": "wowwwww"
+    "comment": "gkdlgklfn"
 }
 
 ###
-# 카드 삭제
-DELETE {{domain}}/card/1
+# 댓글 삭제 @Param(id)
+DELETE {{domain}}/comment/7
 Authorization: Bearer {{AccessToken}}
 Content-Type: application/json
