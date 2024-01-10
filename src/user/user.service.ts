@@ -2,8 +2,9 @@ import { BadRequestException, ConflictException, Injectable, UnauthorizedExcepti
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { BoardMember } from 'src/board-member/entities/board-member.entity';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
@@ -14,6 +15,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(BoardMember)
+    private boardMemberRepository: Repository<BoardMember>,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
   ) {}
@@ -71,8 +74,34 @@ export class UserService {
     };
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll(board_id: number, user_id: number) {
+    // 본인 포함하여 보드에 포함되지 않은 유저 목록 조회
+    // 보드 멤버에 추가되어있지 않은 회원 번호 조회
+    const excludedUserIds = await this.boardMemberRepository.createQueryBuilder('boardMember').select('boardMember.user_id').where('boardMember.board_id = :board_id', { board_id }).getMany();
+    const excludedUserIdsArray = excludedUserIds.map((boardMember) => boardMember.user_id);
+
+    // 본인을 제외한 회원 목록 조회
+    const users = await this.userRepository.createQueryBuilder('user').where('user.id NOT IN (:...excludedUserIds)', { excludedUserIds: excludedUserIdsArray }).andWhere('user.id != :excludedUserId', { excludedUserId: user_id }).getMany();
+    return { users };
+  }
+
+  async searchAll(board_id: number, user_id: number, user_keyword: string) {
+    // 본인 포함하여 보드에 포함되지 않은 유저 목록 조회
+    // 보드 멤버에 추가되어있지 않은 회원 번호 조회
+    const excludedUserIds = await this.boardMemberRepository.createQueryBuilder('boardMember').select('boardMember.user_id').where('boardMember.board_id = :board_id', { board_id }).getMany();
+    const excludedUserIdsArray = excludedUserIds.map((boardMember) => boardMember.user_id);
+
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id NOT IN (:...excludedUserIds)', { excludedUserIds: excludedUserIdsArray })
+      .andWhere('user.id != :excludedUserId', { excludedUserId: user_id })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('user.name LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` }).orWhere('user.email LIKE :keywordPattern', { keywordPattern: `%${user_keyword}%` });
+        }),
+      )
+      .getMany();
+    return { users };
   }
 
   async findOne(id: number) {
