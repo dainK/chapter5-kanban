@@ -31,6 +31,7 @@ export async function showSidebarState() {
 }
 
 async function showSideStatelogin(username) {
+  document.getElementById('main-container').style.display = 'none';
   const text = document.getElementById('sidebar-text');
   text.innerText = `${username}님 안녕하세요.`;
   document.getElementById('login-button').style.display = 'none';
@@ -42,6 +43,7 @@ async function showSideStatelogin(username) {
 }
 
 function showSideStatelogout() {
+  document.getElementById('main-container').style.display = 'none';
   const text = document.getElementById('sidebar-text');
   text.innerText = `로그인이 필요합니다.`;
   document.getElementById('login-button').style.display = 'block';
@@ -52,7 +54,7 @@ function showSideStatelogout() {
 }
 
 function createSidebar() {
-  const main = document.getElementById('main');
+  const menu = document.getElementById('menu');
   const button = document.createElement('button');
   button.id = 'menu-button';
   button.style.backgroundColor = '#a2cfff';
@@ -64,7 +66,7 @@ function createSidebar() {
   </span>`;
   button.innerHTML = `☰`;
   button.onclick = openNav;
-  main.appendChild(button);
+  menu.appendChild(button);
 
   const sidebar = document.getElementById('sidebar');
 
