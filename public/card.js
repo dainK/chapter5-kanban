@@ -5,7 +5,7 @@ import { value } from "./value.js";
 export function initializeCard() {
   createAddTaskModal();
   createVeiwTaskModal();
-  
+
   hideAddTaskModal();
   // hideEditTaskModal();
   hideVeiwTaskModal();
@@ -15,12 +15,12 @@ export function initializeCard() {
 export function showAddTaskModal(columnId) {
   value.cardColumnId = columnId;
   document.getElementById("modal-container").style.display = "flex";
-  
+
   //reset
   document.getElementById("task-title").value = "";
   document.getElementById("task-assignee").value = "";
   document.getElementById("task-due-date").value = "";
-  document.getElementById("task-priority").value = "MEDIUM";
+  document.getElementById("task-priority").value = "1";
   document.getElementById("task-content").value = "";
 
   document.getElementById("submit-btn").style.display = "block";
@@ -39,7 +39,7 @@ function hideAddTaskModal() {
 
 function showEditTaskModal() {
   document.getElementById("modal-container").style.display = "flex";
-  
+
   document.getElementById("add-task").style.display = "none";
   document.getElementById("edit-task").style.display = "block";
   document.getElementById("submit-btn").style.display = "none";
@@ -92,7 +92,7 @@ function createAddTaskModal() {
   const closeBtn = document.createElement("span");
   closeBtn.id = "close-btn";
   closeBtn.innerHTML = "&times;";
-  closeBtn.onclick = hideAddTaskModal; 
+  closeBtn.onclick = hideAddTaskModal;
 
   // ADD TASK column-header 생성
   const addTaskHeader = document.createElement("div");
@@ -150,9 +150,9 @@ function createAddTaskModal() {
   priorityselect.id = "task-priority";
 
   const priorities = ["HIGH", "MEDIUM", "LOW"];
-  priorities.forEach((priority) => {
+  priorities.forEach((priority, index) => {
     const option = document.createElement("option");
-    option.value = priority;
+    option.value = index;
     option.textContent = priority;
     if (priority === "MEDIUM") {
       option.selected = true; // 기본 선택값 설정
@@ -197,22 +197,38 @@ function createAddTaskModal() {
   submitBtn.textContent = "등록 하기";
 
   submitBtn.addEventListener("click", function () {
+    const columnId = document.getElementById(value.cardColumnId).id;
     const title = document.getElementById("task-title").value;
     const assignee = document.getElementById("task-assignee").value;
     const dueDate = document.getElementById("task-due-date").value;
     const priority = document.getElementById("task-priority").value;
     const content = document.getElementById("task-content").value;
 
-    createTaskCard(
-      document.getElementById(value.cardColumnId),
-      title,
-      assignee,
-      dueDate,
-      priority,
-      content
-    );
-
-    hideAddTaskModal();
+    // 카드 저장 API
+    const accessToken = localStorage.getItem('access_token');
+    axios
+      .post(`/card/${columnId}`,
+        { title, content, deadLine: dueDate, priority },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+      .then((response) => {
+        createTaskCard(
+          document.getElementById(value.cardColumnId),
+          title,
+          assignee,
+          dueDate,
+          priority,
+          content
+        );
+        // drawColumn(boardId, columnId, columnTitle);
+        hideAddTaskModal();
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
   });
 
   // 수정하기 버튼 생성
@@ -346,7 +362,7 @@ export function createTaskCard(
   buttonbox.appendChild(editButton);
 
   editButton.addEventListener("click", function () {
-    
+
     showEditTaskModal();
 
     const cardData = {
@@ -372,7 +388,7 @@ export function createTaskCard(
     document.getElementById("edit-btn").style.display = "block";
     document.getElementById("add-task").style.display = "none";
     document.getElementById("edit-task").style.display = "block";
-      
+
   });
 
   const deleteButton = document.createElement("button");
