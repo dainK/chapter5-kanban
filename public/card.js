@@ -572,6 +572,7 @@ export async function createTaskCard(
   // 드래그 앤 드롭을
   card.addEventListener("dragstart", function () {
     value.draggedcardItem = card;
+    value.draggedcardId = id;
     card.classList.add("dragging");
     setTimeout(() => (card.style.display = "none"), 0);
   });
@@ -579,28 +580,11 @@ export async function createTaskCard(
   // 카드 이동 완료
   card.addEventListener("dragend", function () {
     setTimeout(() => {
-      const cards = document.querySelectorAll('.card');
-      const index = Array.from(cards).indexOf(card);
-      console.log('index: ', index);
-      // 카드 정보 수정 API
-      const accessToken = localStorage.getItem('access_token');
-      axios.patch(`/card/${id}`,
-        { title, content, deadLine: dueDate, priority, index },
-        {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        }
-      )
-        .then(response => {
-          console.log('response: ', response);
-        })
-        .catch(error => {
-          console.log('error: ', error);
-          alert(error.response.data.message);
-        });
-
       card.style.display = "block";
       card.classList.remove("dragging");
       value.draggedcardItem = null;
+      value.draggedcardId = null;
+
     }, 0);
   });
 

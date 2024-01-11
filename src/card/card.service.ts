@@ -68,13 +68,18 @@ export class CardService {
     const card = await this.findOne(id);
     console.log('index!!!>>>>>>>', updateCardDto.index);
 
+    Object.assign(card, updateCardDto);
     // index 안받으면 newOrder 함수 안들어가게
     if (updateCardDto.index >= 0) {
-      const newOrder = await this.getNewOrder(card.board_column_id, updateCardDto.index);
+      const newOrder = await this.getNewOrder(updateCardDto.columnId, updateCardDto.index);
       card.order = newOrder;
+
+      const boardColumn = await this.boardColumnRepository.findOne({ where: { id: updateCardDto.columnId } });
+
+      card.board_column_id = boardColumn.id;
+      card.board_column = boardColumn;
     }
 
-    Object.assign(card, updateCardDto);
     return await this.cardRepository.save(card);
   }
 
@@ -96,6 +101,12 @@ export class CardService {
 
   async getNewOrder(boardColumnId: number, index: number) {
     const cards = await this.cardRepository.find({ where: { board_column_id: boardColumnId }, order: { order: 'ASC' } });
+
+    if( cards.length === 0) {
+      return await this.getOrder(boardColumnId);
+    }
+    if (index === 0 ) return LexoRank.parse(cards[0].order).genPrev().toString();
+    if(index === cards.length -1) return LexoRank.parse(cards[cards.length -1].order).genNext().toString();
 
     // cards의 0번째 order의 앞순서가 최소lexorank보다 작거나 cards의 마지막 order의 다음순서가 최대lexorank보다 크면 재정렬하기
     if (LexoRank.parse(cards[0].order).genPrev() <= LexoRank.min() || LexoRank.parse(cards[cards.length - 1].order).genNext() >= LexoRank.max()) this.reOrdering(boardColumnId);

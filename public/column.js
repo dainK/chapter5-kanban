@@ -176,6 +176,27 @@ export function drawColumn(boardId, columnId, columnTitle, index) {
         column.insertBefore(value.draggedcardItem, afterElement);
       }
       moveAddCardButton(column);
+
+      const cards = column.querySelectorAll('.card');
+      const index = Array.from(cards).indexOf(value.draggedcardItem);
+      console.log('index: ', index);
+      // 카드 정보 수정 API
+      const accessToken = localStorage.getItem('access_token');
+      axios.patch(`/card/${value.draggedcardId}`,
+        {index, columnId },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      )
+        .then(response => {
+          console.log('response: ', response);
+        })
+        .catch(error => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+
+
     } else if (value.draggedcolumnItem) {
       // 열에 대한 드래그 앤 드롭 처리 추가
       let afterElement = getColumnDragAfterElement(board, e.clientX);

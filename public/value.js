@@ -2,6 +2,7 @@ export const value = {
   cardId: null,
   cardColumnId: null,
   draggedcardItem: null,
+  draggedcardId: null,
   draggedcolumnItem: null,
   boardName: null,
   boardId: null,

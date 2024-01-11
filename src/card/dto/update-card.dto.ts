@@ -3,4 +3,6 @@ import { CreateCardDto } from './create-card.dto';
 
 export class UpdateCardDto extends PartialType(CreateCardDto) {
   index: number;
+
+  columnId : number;
 }
