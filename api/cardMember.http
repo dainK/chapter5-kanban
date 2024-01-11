@@ -26,6 +26,16 @@ Content-Type: application/json
 
 
 ###
+# 카드 멤버에 속하지 않은 보드 멤버 전체 조회
+GET {{domain}}/card-member/list-true/1
+Content-Type: application/json
+
+###
+# 카드 멤버에 속하지 않은 보드 멤버 전체 조회
+GET {{domain}}/card-member/list-false/11
+Content-Type: application/json
+
+###
 # 특정 카드 담당자 조회
 # @name loginToken
 GET {{domain}}/card-member/card/1

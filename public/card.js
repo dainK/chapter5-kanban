@@ -94,7 +94,7 @@ let currentColumnId;
 let currentOrder;
 
 // 카드 추가 모달 그리기
-function drawAddTaskModal() {
+async function drawAddTaskModal() {
   const submitContainer = document.createElement("div");
   submitContainer.id = "submit-container";
 
@@ -134,13 +134,59 @@ function drawAddTaskModal() {
   const assigneeselect = document.createElement("select");
   assigneeselect.classList.add("select-input");
   assigneeselect.id = "task-assignee";
+  assigneeselect.innerHTML = `<option value="0" disabled selected>담당자를 선택해주세요.</option>`;
 
-  const assignees = ["윤겸", "정선", "아영", "다형"];
-  assignees.forEach((assignee) => {
-    const option = document.createElement("option");
-    option.value = assignee;
-    option.textContent = assignee;
-    assigneeselect.appendChild(option);
+  // API 실행해서 담당자 목록 조회
+  // 콤보박스를 누르면 API 갱신하도록 실행
+  assigneeselect.addEventListener('click', () => {
+    console.log("클릭 이벤트");
+    const cardId = value.cardId;
+    // 추가했던 옵션들 깡으로 통으로 삭제하기 근데 깜빡이는거 불편한데 우짜지
+    assigneeselect.innerHTML = `<option value="0" disabled selected>담당자를 선택해주세요.</option>`;
+    // assigneeselect.appendChild(placeholderOption);
+    // 보드멤버에 존재하며 카드멤버에는 존재하지 않는 회원 정보 조회
+    // 칼럼 목록 조회 API
+    const accessToken = localStorage.getItem('access_token');
+    axios
+      .get(`/card-member/list-false/${cardId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((response) => {
+        const assignees = response.data.boardMembers;
+        if (assignees) {
+          assignees.forEach((assignee) => {
+            const option = document.createElement("option");
+            option.value = assignee.user.id;
+            option.textContent = `이메일 : ${assignee.user.email} 이름 : ${assignee.user.name}`;
+            assigneeselect.appendChild(option);
+          });
+        }
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
+
+    // 콤보박스의 값이 변경되었을 경우
+    assigneeselect.addEventListener('change', function (event) {
+      const userId = this.value;
+      console.log('userId: ', userId);
+      // 카드 담당자 저장 API
+      const accessToken = localStorage.getItem('access_token');
+      axios
+        .post(`/card-member`,
+          { cardId, userId },
+          {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          })
+        .then((response) => {
+          console.log("담당자 배정 완료");
+        })
+        .catch((error) => {
+          console.log('error: ', error);
+          alert(error.response.data.message);
+        });
+    });
   });
 
   assigneeGroup.appendChild(assigneelabel);
@@ -321,21 +367,21 @@ export function drawVeiwTaskModal() {
   container.appendChild(closeButton);
 
 
-  const boxs =  document.createElement("div"); 
+  const boxs = document.createElement("div");
   // boxs.classList.add("boxs");
-  boxs.style.display = "flex"; 
+  boxs.style.display = "flex";
   // boxs.style.alignItems = "stretch";
   container.appendChild(boxs);
-  
 
-  const taskbox =  document.createElement("div"); 
+
+  const taskbox = document.createElement("div");
   taskbox.id = 'task-box';
   // taskbox.classList.add("boxs-child");
   taskbox.style.width = "280px";
   taskbox.style.flexGrow = "1";
   taskbox.style.marginRight = "5px";
   boxs.appendChild(taskbox);
-  
+
   const columnHeader = document.createElement("div");
   columnHeader.classList.add("column-header");
   columnHeader.textContent = "TASK";
@@ -368,73 +414,73 @@ export function drawVeiwTaskModal() {
   createGroup("내용", "card-view-content");
 
 
-  const commentbox =  document.createElement("div"); 
+  const commentbox = document.createElement("div");
   commentbox.id = 'comment-box';
   // commentsbox.classList.add("boxs-child");
   commentbox.style.width = "200px";
   commentbox.style.flexGrow = "1";
   commentbox.style.marginLeft = "5px";
   boxs.appendChild(commentbox);
-  
+
   const commenHeader = document.createElement("div");
   commenHeader.classList.add("column-header");
   commenHeader.textContent = "COMMENTS";
   commentbox.appendChild(commenHeader);
 
-  const comments =  document.createElement("div");
+  const comments = document.createElement("div");
   comments.id = 'task-comments';
   comments.style.height = "465px";
-  comments.style.overflow = "auto"; 
+  comments.style.overflow = "auto";
   // comments.style.border = "1px solid #ccc";
   commentbox.appendChild(comments);
-  
-  const inputbox =  document.createElement("div"); 
+
+  const inputbox = document.createElement("div");
   inputbox.classList.add("form");
   commentbox.appendChild(inputbox);
-  
+
   const input = document.createElement("input");
   input.classList.add("input");
   input.type = "text";
   input.id = "comment-input";
   input.placeholder = "덧글쓰기";
   inputbox.appendChild(input);
-  
+
   const commentBtn = document.createElement("button");
   commentBtn.id = "comment-btn";
   commentBtn.textContent = "등록 하기";
   inputbox.appendChild(commentBtn);
-  commentBtn.addEventListener('click',async ()=>{
+  commentBtn.addEventListener('click', async () => {
 
     const cardId = value.cardId;
     const comment = document.getElementById('comment-input').value;
     const accessToken = await localStorage.getItem('access_token');
     await axios
-    .post(
-      `/comment/${cardId}`,
-      { comment },
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    )
-    .then((response) => {
-      loadComments(cardId);
-    })
-    .catch((error) => {
-      console.log('error: ', error);
-      alert(error.response.data.message);
-    });
-  })
+      .post(
+        `/comment/${cardId}`,
+        { comment },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+      .then((response) => {
+        loadComments(cardId);
+      })
+      .catch((error) => {
+        console.log('error: ', error);
+        alert(error.response.data.message);
+      });
+  });
 
 
   document.getElementById("modal-container").appendChild(container);
 }
 
-async function  loadComments(cardId) {
+async function loadComments(cardId) {
   document.getElementById('comment-input').value = '';
 
   const comments = document.getElementById('task-comments');
-  comments.innerHTML =``;
-  
+  comments.innerHTML = ``;
+
   const createComment = (name, comment) => {
     const group = document.createElement("div");
     group.classList.add("group");
@@ -455,23 +501,23 @@ async function  loadComments(cardId) {
 
   const accessToken = await localStorage.getItem('access_token');
   await axios
-  .get(
-    `/comment/ofCard/${cardId}`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-  )
-  .then((response) => {
-    console.log(response.data);
-    // loadComments(response.data);
-    response.data.forEach((e)=>{
-      createComment(e.board_member_id, e.comment);
+    .get(
+      `/comment/ofCard/${cardId}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    )
+    .then((response) => {
+      console.log(response.data);
+      // loadComments(response.data);
+      response.data.forEach((e) => {
+        createComment(e.board_member_id, e.comment);
+      });
     })
-  })
-  .catch((error) => {
-    console.log('error: ', error);
-    alert(error.response.data.message);
-  });
+    .catch((error) => {
+      console.log('error: ', error);
+      alert(error.response.data.message);
+    });
 
 }
 

@@ -8,7 +8,7 @@ export class AuthService {
   // 액세스 토큰 발급
   generateAccessToken(user: any) {
     const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '10m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
     return { access_token: accessToken };
   }
 }

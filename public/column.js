@@ -27,9 +27,9 @@ export async function createColumn(boardId, columnId, columnTitle) {
 // 칼럼 목록 조회
 export async function loadColumnList(boardId) {
   const board = document.getElementById('board');
-  const accessToken = await localStorage.getItem('access_token');
 
   // 칼럼 목록 조회 API
+  const accessToken = await localStorage.getItem('access_token');
   await axios
     .get(`/board-column/${boardId}`, {
       headers: { Authorization: `Bearer ${accessToken}` },

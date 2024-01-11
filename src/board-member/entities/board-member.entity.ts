@@ -2,6 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 
 import { User } from 'src/user/entities/user.entity';
 import { Board } from 'src/board/entities/board.entity';
+import { CardMember } from 'src/card-member/entities/card-member.entity';
 
 import { BoardMemberRole } from '../types/boradMemberRole.type';
 
@@ -32,6 +33,10 @@ export class BoardMember {
   board: Board; // 관계 테이블
   @Column({ type: 'int', name: 'board_id' })
   board_id: number; // 외래키
+
+  // 일대다 관계 설정(board_member)
+  @OneToMany(() => CardMember, (cardMember) => cardMember.boardMember)
+  cardMember: CardMember[];
 
   @Column({ type: 'enum', enum: BoardMemberRole, default: BoardMemberRole.Viewer }) // role 필드는 enum에서 설정한 값만 가질 수 있음
   role: BoardMemberRole;
