@@ -357,7 +357,10 @@ async function createProfileModal() {
     )
       .then(response => {
         console.log('response: ', response);
-        alert("수정이 완료되었습니다.");
+        // alert("수정이 완료되었습니다.");
+        const text = document.getElementById('sidebar-text');
+        text.innerText = `${name}님 안녕하세요.`;
+
       })
       .catch(error => {
         console.log('error: ', error);
