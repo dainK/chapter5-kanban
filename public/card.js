@@ -566,7 +566,23 @@ export async function createTaskCard(
   buttonbox.appendChild(deleteButton);
 
   deleteButton.addEventListener("click", function (e) {
-    e.target.parentNode.parentNode.remove();
+     // 카드 삭제 API
+     const accessToken = localStorage.getItem('access_token');
+     axios.delete(`/card/${id}`,
+       {
+         headers: { Authorization: `Bearer ${accessToken}` }
+       }
+     )
+       .then(response => {
+         console.log('response: ', response);
+         e.target.parentNode.parentNode.remove();
+     
+       })
+       .catch(error => {
+         console.log('error: ', error);
+         alert(error.response.data.message);
+       });
+
   });
 
   // 드래그 앤 드롭을
