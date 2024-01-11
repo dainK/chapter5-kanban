@@ -641,7 +641,7 @@ async function drawBoardMemberList(boardMembers) {
 
       // 삭제 버튼
       const trashButton = document.createElement('div');
-      trashButton.innerHTML = `<span class="board-trash-button">
+      trashButton.innerHTML = `<span class="board-list-trash-button">
         <span class="material-symbols-outlined">delete</span>
         </span>`;
       if (boardMember.boardMember[0].role !== 0 && currentBoardMemberRole === 0 || currentBoardMemberRole === 1) listItem.appendChild(trashButton);

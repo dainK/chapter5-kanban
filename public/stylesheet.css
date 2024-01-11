@@ -236,6 +236,14 @@ button:hover {
   font-size: 20px;
   cursor: pointer;
 }
+.board-list-trash-button {
+  position: absolute;
+  /* top: 45px; */
+  right: 20px;
+  transform: translateY(-75%);
+  font-size: 20px;
+  cursor: pointer;
+}
 .column {
   background-color: white;
   border-radius: 4px;
