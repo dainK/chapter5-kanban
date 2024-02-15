@@ -36,7 +36,7 @@
 ![image](https://github.com/dainK/chapter5-kanban/assets/26786677/d635719b-8500-400f-9a39-7dc7dd76aff8)
 
 ### 보드, 컬럼, 테스크 - 생성, 수정, 삭제
-![녹화_2024_02_16_04_21_46_367](https://github.com/dainK/chapter5-kanban/assets/26786677/972fde82-f1fb-49d6-8b5d-b7e5fb68f500)
+![녹화_2024_02_16_04_21_46_367 (1)](https://github.com/dainK/chapter5-kanban/assets/26786677/879e250e-f041-4fe1-b25f-bdfb04531a81)
 
 ### 초대, 알림 기능
 ![녹화_2024_02_16_04_19_33_222](https://github.com/dainK/chapter5-kanban/assets/26786677/c151418f-7b34-4cd4-b2c6-7abaaa565194)
